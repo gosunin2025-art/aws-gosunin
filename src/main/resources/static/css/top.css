@@ -1,0 +1,19 @@
+.container_login {
+    width: 1200px;
+    background-color: royalblue;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.container_login .item {
+    width: 100px;
+    height: 100px;
+    background-color: orange;
+    border: 3px dashed red;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+}

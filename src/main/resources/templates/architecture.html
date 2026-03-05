@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>선인상우회 AI 플랫폼 아키텍처</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:       #f0f3f9;
+  --surface:  #ffffff;
+  --surface2: #f7f9fc;
+  --border:   #dde2ee;
+  --border2:  #c4cde0;
+
+  --blue:     #2672d9;
+  --blue-dim: rgba(38,114,217,0.08);
+  --cyan:     #0891b2;
+  --cyan-dim: rgba(8,145,178,0.08);
+  --green:    #00a870;
+  --green-dim:rgba(0,168,112,0.08);
+  --orange:   #d96b20;
+  --orange-dim:rgba(217,107,32,0.08);
+  --purple:   #7c3aed;
+  --purple-dim:rgba(124,58,237,0.08);
+  --red:      #c0354e;
+  --red-dim:  rgba(192,53,78,0.08);
+
+  --text:     #1a1e2e;
+  --text-mid: #525c7a;
+  --text-dim: #8b93b0;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 60px;
+}
+
+/* ── 헤더 ── */
+.page-header {
+  padding: 36px 48px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgba(38,60,120,0.06);
+}
+.header-left {}
+.header-kicker {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--blue);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.header-title {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+.header-title span { color: var(--blue); }
+.header-desc {
+  font-size: 13px;
+  color: var(--text-mid);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+.header-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.h-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+.h-badge.blue   { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(59,130,246,0.25); }
+.h-badge.green  { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(16,185,129,0.25); }
+.h-badge.purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(139,92,246,0.25); }
+
+/* ── 메인 캔버스 ── */
+.canvas {
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── 레이어 라벨 ── */
+.layer-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.layer-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── 흐름 화살표 연결부 ── */
+.flow-arrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+  gap: 12px;
+  position: relative;
+}
+.arrow-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.arrow-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.arrow-body {
+  width: 2px;
+  height: 28px;
+  position: relative;
+}
+.arrow-body::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 2px; height: 100%;
+  border-radius: 1px;
+  animation: flowDown 1.5s linear infinite;
+}
+.arrow-body.down::before  { background: linear-gradient(180deg, transparent, var(--blue), transparent); }
+.arrow-body.up::before    { background: linear-gradient(0deg, transparent, var(--green), transparent); }
+.arrow-body.both::before  { background: linear-gradient(180deg, var(--blue), var(--green)); }
+
+@keyframes flowDown {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* ── ROW 그리드 ── */
+.arch-row {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.row-3 { grid-template-columns: repeat(3, 1fr); }
+.row-4 { grid-template-columns: repeat(4, 1fr); }
+.row-2 { grid-template-columns: repeat(2, 1fr); }
+.row-5 { grid-template-columns: repeat(5, 1fr); }
+
+/* ── 노드 카드 ── */
+.node {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.node:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(38,60,120,0.12);
+}
+.node::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 12px 12px 0 0;
+  opacity: 0.8;
+}
+.node.blue::before   { background: var(--blue); }
+.node.cyan::before   { background: var(--cyan); }
+.node.green::before  { background: var(--green); }
+.node.orange::before { background: var(--orange); }
+.node.purple::before { background: var(--purple); }
+.node.red::before    { background: var(--red); }
+
+.node-icon { font-size: 20px; margin-bottom: 8px; }
+.node-title {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.node-sub {
+  font-size: 10px;
+  color: var(--text-mid);
+  line-height: 1.5;
+}
+.node-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.ntag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+}
+.ntag.blue   { background: var(--blue-dim);   color: var(--blue); }
+.ntag.cyan   { background: var(--cyan-dim);   color: var(--cyan); }
+.ntag.green  { background: var(--green-dim);  color: var(--green); }
+.ntag.orange { background: var(--orange-dim); color: var(--orange); }
+.ntag.purple { background: var(--purple-dim); color: var(--purple); }
+.ntag.red    { background: var(--red-dim);    color: var(--red); }
+
+/* ── HUB 중앙 노드 ── */
+.hub-wrap {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 8px;
+}
+.hub-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+.hub-center {
+  background: linear-gradient(135deg, #2672d9 0%, #1a58b0 50%, #1e8fd4 100%);
+  border: 1px solid rgba(38,114,217,0.30);
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(38,114,217,0.20), 0 2px 8px rgba(38,114,217,0.10);
+}
+.hub-center::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.hub-glow {
+  position: absolute;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(96,165,250,0.2), transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  animation: glow 3s ease-in-out infinite;
+}
+@keyframes glow {
+  0%,100% { opacity: 0.5; transform: translate(-50%,-50%) scale(1); }
+  50%      { opacity: 1;   transform: translate(-50%,-50%) scale(1.2); }
+}
+
+.hub-logos {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  position: relative; z-index: 1;
+}
+.hub-logo-badge {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+}
+.hub-main-title {
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.4;
+  color: white;
+  margin-bottom: 12px;
+  position: relative; z-index: 1;
+}
+.hub-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+  position: relative; z-index: 1;
+}
+.hub-chip {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 10px;
+  color: rgba(255,255,255,0.85);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.3px;
+}
+
+/* 허브 연결 화살표 (좌우) */
+.hub-arrows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+.h-arrow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+}
+.h-arrow-line {
+  flex: 1;
+  height: 1px;
+  min-width: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.h-arrow-line::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  height: 1px; width: 50%;
+  border-radius: 1px;
+  animation: flowRight 1.8s linear infinite;
+}
+.h-arrow-line.blue::after   { background: var(--blue); }
+.h-arrow-line.green::after  { background: var(--green); }
+.h-arrow-line.orange::after { background: var(--orange); }
+
+@keyframes flowRight {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+/* ── 데이터 플로우 섹션 ── */
+.flow-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(38,60,120,0.06);
+}
+.flow-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-mid);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.flow-title::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:0.4; transform:scale(1.3); }
+}
+
+.flow-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+}
+.flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 100px;
+}
+.fs-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid;
+}
+.fs-num.blue   { background: var(--blue-dim);   color: var(--blue);   border-color: rgba(59,130,246,0.4); }
+.fs-num.cyan   { background: var(--cyan-dim);   color: var(--cyan);   border-color: rgba(6,182,212,0.4); }
+.fs-num.green  { background: var(--green-dim);  color: var(--green);  border-color: rgba(16,185,129,0.4); }
+.fs-num.orange { background: var(--orange-dim); color: var(--orange); border-color: rgba(245,158,11,0.4); }
+.fs-num.purple { background: var(--purple-dim); color: var(--purple); border-color: rgba(139,92,246,0.4); }
+
+.fs-label { font-size: 11px; font-weight: 600; text-align: center; }
+.fs-sub   { font-size: 10px; color: var(--text-mid); text-align: center; line-height: 1.4; }
+
+.fs-connector {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+  margin-bottom: 26px;
+}
+.fsc-line {
+  width: 28px; height: 1px;
+  position: relative; overflow: hidden;
+}
+.fsc-line::after {
+  content: '';
+  position: absolute; top:0; left:0;
+  height: 1px; width: 40%;
+  animation: flowRight 1.5s linear infinite;
+}
+.fsc-line.blue::after   { background: var(--blue); }
+.fsc-line.green::after  { background: var(--green); }
+.fsc-line.orange::after { background: var(--orange); }
+.fsc-arrow { font-size: 10px; }
+
+/* ── 기술 스택 섹션 ── */
+.tech-section {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.tech-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(38,60,120,0.06);
+}
+.tech-card:hover { border-color: var(--border2); box-shadow: 0 4px 16px rgba(38,60,120,0.10); }
+.tc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.tc-icon { font-size: 18px; }
+.tc-name { font-size: 12px; font-weight: 700; }
+.tc-role { font-size: 10px; color: var(--text-mid); margin-bottom: 8px; line-height: 1.5; }
+.tc-items { list-style: none; }
+.tc-items li {
+  font-size: 10px;
+  color: var(--text-mid);
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.tc-items li:last-child { border-bottom: none; }
+.tc-items li::before { content: '▸'; color: var(--text-dim); font-size: 9px; }
+
+/* ── 범례 ── */
+.legend {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+.legend-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-right: 4px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-mid);
+}
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ── 헤더 ── -->
+<div class="page-header">
+  <div class="header-left">
+    <div class="header-kicker">Platform Architecture · Claude's View</div>
+    <div class="header-title">선인상우회 <span>AI 플랫폼</span> 아키텍처</div>
+    <div class="header-desc">수요처 → RAG Chain 허브 → 상인(공급처) → 기술 인프라 · 4개 레이어 구조</div>
+  </div>
+  <div class="header-right">
+    <div class="h-badge blue">B2G · B2B</div>
+    <div class="h-badge green">RAG Chain</div>
+    <div class="h-badge purple">Claude + LangChain</div>
+  </div>
+</div>
+
+<div class="canvas">
+
+  <!-- ══ LAYER 1: 수요처 ══ -->
+  <div class="layer-label">Layer 01 · 수요처 (Demand Side)</div>
+  <div class="arch-row row-5">
+
+    <div class="node blue">
+      <div class="node-icon">🏛️</div>
+      <div class="node-title">중앙정부 기관</div>
+      <div class="node-sub">중소벤처기업부<br>과학기술정보통신부<br>대한민국 정부</div>
+      <div class="node-tags">
+        <span class="ntag blue">B2G</span>
+        <span class="ntag blue">나라장터</span>
+      </div>
+    </div>
+
+    <div class="node blue">
+      <div class="node-icon">🏙️</div>
+      <div class="node-title">지자체</div>
+      <div class="node-sub">서울특별시<br>경기도 · 부산광역시</div>
+      <div class="node-tags">
+        <span class="ntag blue">B2G</span>
+        <span class="ntag cyan">소버린 AI</span>
+      </div>
+    </div>
+
+    <div class="node cyan">
+      <div class="node-icon">🎓</div>
+      <div class="node-title">대학·연구기관</div>
+      <div class="node-sub">서울대학교<br>광운대학교 · KAIST</div>
+      <div class="node-tags">
+        <span class="ntag cyan">B2G</span>
+        <span class="ntag cyan">R&D 조달</span>
+      </div>
+    </div>
+
+    <div class="node green">
+      <div class="node-icon">🏢</div>
+      <div class="node-title">B2B 기업</div>
+      <div class="node-sub">AI 스타트업<br>IT 서비스 기업<br>데이터센터</div>
+      <div class="node-tags">
+        <span class="ntag green">B2B</span>
+        <span class="ntag green">직접 발주</span>
+      </div>
+    </div>
+
+    <div class="node orange">
+      <div class="node-icon">💬</div>
+      <div class="node-title">요청 채널</div>
+      <div class="node-sub">카카오톡 상담<br>Gmail 요청서<br>네이버 폼</div>
+      <div class="node-tags">
+        <span class="ntag orange">TALK</span>
+        <span class="ntag orange">Gmail</span>
+        <span class="ntag orange">N 폼</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 흐름 화살표 (하향) -->
+  <div class="flow-arrow">
+    <div class="arrow-line">
+      <div class="arrow-label">AI 컴퓨팅 사양 요청</div>
+      <div class="arrow-body down"></div>
+      <span style="color:rgba(59,130,246,0.6);font-size:14px;">▼</span>
+    </div>
+  </div>
+
+  <!-- ══ LAYER 2: 핵심 허브 ══ -->
+  <div class="layer-label">Layer 02 · 핵심 허브 (RAG Chain Platform)</div>
+
+  <div class="hub-wrap">
+
+    <!-- 허브 좌측 입력 -->
+    <div class="hub-side">
+      <div class="node blue" style="border-color:rgba(59,130,246,0.25);">
+        <div class="node-icon">📥</div>
+        <div class="node-title">RAG Chain 입력 시스템</div>
+        <div class="node-sub">요청 데이터 수신·분류<br>CSV/PDF 데이터 소스<br>JSON 구조화 처리</div>
+        <div class="node-tags">
+          <span class="ntag blue">Claude</span>
+          <span class="ntag blue">LangChain</span>
+        </div>
+      </div>
+      <div class="node cyan">
+        <div class="node-icon">🗄️</div>
+        <div class="node-title">지식 베이스</div>
+        <div class="node-sub">상품 DB · 가격 정보<br>Word Embeddings<br>Vector Database</div>
+        <div class="node-tags">
+          <span class="ntag cyan">AWS</span>
+          <span class="ntag cyan">On-Prem</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 중앙 허브 -->
+    <div class="hub-center">
+      <div class="hub-glow"></div>
+      <div class="hub-logos">
+        <div class="hub-logo-badge">🤖 AI HUB</div>
+        <div class="hub-logo-badge">🏪 SUN IN</div>
+      </div>
+      <div class="hub-main-title">
+        선인상우회 & 서울AI허브<br>
+        RAG Chain<br>
+        AI 컴퓨팅 유통 견적<br>
+        초자동화 플랫폼
+      </div>
+      <div class="hub-chips">
+        <span class="hub-chip">견적 자동화</span>
+        <span class="hub-chip">RAG 문서생성</span>
+        <span class="hub-chip">재고 매칭</span>
+        <span class="hub-chip">B2G 대응</span>
+        <span class="hub-chip">R&D</span>
+      </div>
+    </div>
+
+    <!-- 허브 우측 출력 -->
+    <div class="hub-side">
+      <div class="node green" style="border-color:rgba(16,185,129,0.25);">
+        <div class="node-icon">📤</div>
+        <div class="node-title">RAG Chain 출력 시스템</div>
+        <div class="node-sub">견적서 자동 생성<br>조달 문서 완성<br>PDF·HWP 출력</div>
+        <div class="node-tags">
+          <span class="ntag green">Claude</span>
+          <span class="ntag green">LangChain</span>
+        </div>
+      </div>
+      <div class="node orange">
+        <div class="node-icon">🚨</div>
+        <div class="node-title">담당자 알림 시스템</div>
+        <div class="node-sub">회사별 담당자 자동 배정<br>Gmail 결과 전송<br>C/S 문제 전담 처리</div>
+        <div class="node-tags">
+          <span class="ntag orange">Gmail</span>
+          <span class="ntag orange">자동배정</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 흐름 화살표 (하향) -->
+  <div class="flow-arrow">
+    <div class="arrow-line">
+      <div class="arrow-label">견적 요청 배분 · 결과 수신</div>
+      <div class="arrow-body both"></div>
+      <span style="color:rgba(16,185,129,0.6);font-size:14px;">▼</span>
+    </div>
+  </div>
+
+  <!-- ══ LAYER 3: 상인(공급처) ══ -->
+  <div class="layer-label">Layer 03 · 상인 · 공급처 (Supply Side)</div>
+
+  <div class="arch-row row-4">
+
+    <div class="node orange">
+      <div class="node-icon">🏪</div>
+      <div class="node-title">선인 상인 A</div>
+      <div class="node-sub">GPU 서버 전문<br>NVIDIA H100·A100<br>납기 3~5일</div>
+      <div class="node-tags">
+        <span class="ntag orange">Gmail 수신</span>
+        <span class="ntag orange">견적 대응</span>
+      </div>
+    </div>
+
+    <div class="node orange">
+      <div class="node-icon">🏪</div>
+      <div class="node-title">선인 상인 B</div>
+      <div class="node-sub">스토리지 전문<br>NVMe·SSD·HDD<br>즉시 납품 가능</div>
+      <div class="node-tags">
+        <span class="ntag orange">Gmail 수신</span>
+        <span class="ntag orange">재고 공유</span>
+      </div>
+    </div>
+
+    <div class="node orange">
+      <div class="node-icon">🏪</div>
+      <div class="node-title">선인 상인 C</div>
+      <div class="node-sub">네트워크 장비<br>InfiniBand·스위치<br>B2G 납품 실적</div>
+      <div class="node-tags">
+        <span class="ntag orange">Gmail 수신</span>
+        <span class="ntag orange">공동대응</span>
+      </div>
+    </div>
+
+    <div class="node green">
+      <div class="node-icon">🤝</div>
+      <div class="node-title">글로벌 공급처</div>
+      <div class="node-sub">Microsoft · NVIDIA<br>Intel · Samsung<br>SK Inc · DWcts</div>
+      <div class="node-tags">
+        <span class="ntag green">공급망</span>
+        <span class="ntag green">파트너십</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 흐름 화살표 -->
+  <div class="flow-arrow">
+    <div class="arrow-line">
+      <div class="arrow-label">AI 상품 추천 · 온프라미스 연동</div>
+      <div class="arrow-body down"></div>
+      <span style="color:rgba(59,130,246,0.6);font-size:14px;">▼</span>
+    </div>
+  </div>
+
+  <!-- ══ LAYER 4: 기술 인프라 ══ -->
+  <div class="layer-label">Layer 04 · 기술 인프라 (Tech Infrastructure)</div>
+
+  <div class="tech-section">
+
+    <div class="tech-card">
+      <div class="tc-header">
+        <div class="tc-icon">✳️</div>
+        <div class="tc-name" style="color:#cc785c;">Claude (Anthropic)</div>
+      </div>
+      <div class="tc-role">견적 분석·문서 생성 AI<br>RAG Chain 핵심 LLM</div>
+      <ul class="tc-items">
+        <li>스펙 요구사항 자연어 분석</li>
+        <li>최적 구성안 3가지 추천</li>
+        <li>조달 문서 초안 자동 작성</li>
+        <li>기술 제안서 생성</li>
+      </ul>
+    </div>
+
+    <div class="tech-card">
+      <div class="tc-header">
+        <div class="tc-icon">🦜</div>
+        <div class="tc-name" style="color:#10b981;">LangChain</div>
+      </div>
+      <div class="tc-role">RAG 파이프라인 오케스트레이션<br>벡터 DB 연동 관리</div>
+      <ul class="tc-items">
+        <li>Data Source → Embedding</li>
+        <li>Vector DB 검색·매핑</li>
+        <li>LLM 체인 워크플로우</li>
+        <li>JSON 구조화 출력</li>
+      </ul>
+    </div>
+
+    <div class="tech-card">
+      <div class="tc-header">
+        <div class="tc-icon">☁️</div>
+        <div class="tc-name" style="color:#f59e0b;">AWS Cloud</div>
+      </div>
+      <div class="tc-role">클라우드 인프라<br>확장성·가용성 보장</div>
+      <ul class="tc-items">
+        <li>API 서버 · 백엔드 호스팅</li>
+        <li>Vector DB (OpenSearch)</li>
+        <li>S3 문서 저장소</li>
+        <li>Lambda 이벤트 처리</li>
+      </ul>
+    </div>
+
+    <div class="tech-card">
+      <div class="tc-header">
+        <div class="tc-icon">🖥️</div>
+        <div class="tc-name" style="color:#8b5cf6;">온프라미스</div>
+      </div>
+      <div class="tc-role">AI 상품 추천 서비스<br>민감 데이터 로컬 처리</div>
+      <ul class="tc-items">
+        <li>선인 상가 실거래 DB</li>
+        <li>실시간 재고 동기화</li>
+        <li>AI 상품 추천 모델</li>
+        <li>Spring Boot 백엔드</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ══ 데이터 흐름 요약 ══ -->
+  <div class="flow-section">
+    <div class="flow-title">전체 데이터 흐름 · End-to-End Flow</div>
+    <div class="flow-steps">
+
+      <div class="flow-step">
+        <div class="fs-num blue">01</div>
+        <div class="fs-label">요청 수신</div>
+        <div class="fs-sub">카카오톡·Gmail·폼으로<br>AI 컴퓨팅 사양 접수</div>
+      </div>
+
+      <div class="fs-connector">
+        <div class="fsc-line blue"></div>
+        <div class="fsc-arrow" style="color:var(--blue);">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="fs-num cyan">02</div>
+        <div class="fs-label">RAG 분석</div>
+        <div class="fs-sub">Claude + LangChain<br>요구사항 파싱·매핑</div>
+      </div>
+
+      <div class="fs-connector">
+        <div class="fsc-line blue"></div>
+        <div class="fsc-arrow" style="color:var(--blue);">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="fs-num green">03</div>
+        <div class="fs-label">재고 매칭</div>
+        <div class="fs-sub">회원사 재고 DB<br>납기·가격 자동 조회</div>
+      </div>
+
+      <div class="fs-connector">
+        <div class="fsc-line green"></div>
+        <div class="fsc-arrow" style="color:var(--green);">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="fs-num orange">04</div>
+        <div class="fs-label">견적 생성</div>
+        <div class="fs-sub">최적 구성안 3가지<br>PDF 견적서 자동 완성</div>
+      </div>
+
+      <div class="fs-connector">
+        <div class="fsc-line orange"></div>
+        <div class="fsc-arrow" style="color:var(--orange);">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="fs-num purple">05</div>
+        <div class="fs-label">담당자 배분</div>
+        <div class="fs-sub">Gmail로 관련 상인에게<br>자동 배분·알림 발송</div>
+      </div>
+
+      <div class="fs-connector">
+        <div class="fsc-line blue"></div>
+        <div class="fsc-arrow" style="color:var(--blue);">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="fs-num blue">06</div>
+        <div class="fs-label">결과 전달</div>
+        <div class="fs-sub">RAG Chain 결과<br>수요처에 자동 반환</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── 범례 ── -->
+  <div class="legend">
+    <span class="legend-title">LEGEND</span>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--blue);"></div> 수요처·요청</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--cyan);"></div> 플랫폼 허브</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div> 출력·공급</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--orange);"></div> 상인·알림</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--purple);"></div> 인프라</div>
+    <div class="legend-item" style="margin-left:auto;">
+      <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text-dim);">
+        Claude (Anthropic) · Architecture Analysis
+      </span>
+    </div>
+  </div>
+
+</div><!-- /canvas -->
+
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로그인 · 선인상우회 AI 플랫폼</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:           #f4f6fb;
+  --white:        #ffffff;
+  --border:       #dde1ee;
+  --border-focus: #2672d9;
+  --primary:      #2672d9;
+  --primary-dark: #1a58b0;
+  --primary-dim:  rgba(38,114,217,0.08);
+  --green:        #00a870;
+  --green-dim:    rgba(0,168,112,0.10);
+  --red:          #c0354e;
+  --red-dim:      rgba(192,53,78,0.08);
+  --text:         #1a1e2e;
+  --text-mid:     #525c7a;
+  --text-dim:     #8b93b0;
+  --shadow:       0 2px 12px rgba(38,60,120,0.08);
+  --shadow-lg:    0 8px 32px rgba(38,60,120,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 헤더 ── */
+.top-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow);
+}
+.logo-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  background: var(--primary-dim);
+  color: var(--primary);
+  border: 1px solid rgba(38,114,217,0.25);
+  padding: 3px 9px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+.logo-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.logo-sub   { font-size: 11px; color: var(--text-dim); margin-left: 4px; }
+.top-bar-right { margin-left: auto; }
+.back-link {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--primary); }
+
+/* ── 메인 레이아웃 ── */
+.main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px 60px;
+}
+
+.card {
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 460px;
+  overflow: hidden;
+  animation: fadeUp 0.4s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── 카드 상단 ── */
+.card-head {
+  background: linear-gradient(135deg, #2672d9 0%, #1a58b0 100%);
+  padding: 32px 36px 28px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.card-head::before {
+  content: '';
+  position: absolute;
+  right: -30px; top: -30px;
+  width: 140px; height: 140px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.card-head::after {
+  content: '';
+  position: absolute;
+  right: 40px; bottom: -40px;
+  width: 100px; height: 100px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+.card-head-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  opacity: 0.7;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+.card-head-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  position: relative;
+  z-index: 1;
+}
+.card-head-sub {
+  font-size: 13px;
+  opacity: 0.72;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── 폼 본문 ── */
+.form-body { padding: 32px 36px 36px; }
+
+/* 서버 에러 (Thymeleaf 바인딩) */
+.alert-error {
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(192,53,78,0.22);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 가입 완료 후 성공 메시지 */
+.alert-success {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(0,168,112,0.25);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── 입력 필드 ── */
+.field { margin-bottom: 16px; }
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-mid);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.field-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  height: 46px;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  padding: 0 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(38,114,217,0.10);
+}
+input::placeholder { color: var(--text-dim); }
+
+/* 비밀번호 토글 */
+.pw-wrap {
+  position: relative;
+}
+.pw-wrap input { padding-right: 44px; }
+.pw-toggle {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text-dim);
+  padding: 4px;
+  transition: color 0.2s;
+  line-height: 1;
+}
+.pw-toggle:hover { color: var(--text-mid); }
+
+/* 자동 로그인 + 비번 찾기 */
+.login-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.remember-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-mid);
+  user-select: none;
+}
+.remember-wrap input[type="checkbox"] {
+  width: 15px; height: 15px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.forgot-link {
+  font-size: 12px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+.forgot-link:hover { opacity: 0.7; }
+
+/* 로그인 버튼 */
+.btn-login {
+  width: 100%;
+  height: 50px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.btn-login:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(38,114,217,0.30);
+}
+.btn-login:active { transform: translateY(0); }
+
+/* 구분선 */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* 하단 링크 */
+.bottom-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.bottom-links a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.bottom-links a:hover { text-decoration: underline; }
+
+/* 안내 박스 */
+.info-box {
+  margin-top: 20px;
+  background: var(--primary-dim);
+  border: 1px solid rgba(38,114,217,0.18);
+  border-radius: 9px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--primary-dark);
+  line-height: 1.7;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+</style>
+</head>
+<body>
+
+<!-- 상단 바 -->
+<div class="top-bar">
+  <div class="logo-badge">AI PLATFORM</div>
+  <div class="logo-title">선인상우회</div>
+  <div class="logo-sub">AI 컴퓨팅 유통·견적 자동화 플랫폼</div>
+  <div class="top-bar-right">
+    <a class="back-link" th:href="@{/test/main}">← 홈으로</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="card">
+
+    <!-- 카드 헤더 -->
+    <div class="card-head">
+      <div class="card-head-label">MERCHANT LOGIN</div>
+      <div class="card-head-title">로그인</div>
+      <div class="card-head-sub">선인상우회 AI 플랫폼에 오신 것을 환영합니다</div>
+    </div>
+
+    <!-- 로그인 폼 -->
+    <div class="form-body">
+
+      <!-- 회원가입 성공 후 리다이렉트 메시지 (Flash Attribute) -->
+      <div class="alert-success" th:if="${signupSuccess}">
+        ✅ 회원가입이 완료됐습니다! 관리자 승인 후 로그인 가능합니다.
+      </div>
+
+      <!-- 로그인 실패 에러 메시지 -->
+      <div class="alert-error" th:if="${loginError}">
+        ❌ 이메일 또는 비밀번호가 올바르지 않습니다.
+      </div>
+
+      <!--
+        POST /test/login 으로 전송
+        Spring Security 미사용 → CSRF 토큰 없음
+      -->
+      <form id="loginForm"
+            th:action="@{/test/login}"
+            method="post">
+
+        <div class="field">
+          <div class="field-label">이메일</div>
+          <input type="email"
+                 name="email"
+                 id="email"
+                 placeholder="business@example.com"
+                 autocomplete="email"
+                 th:value="${savedEmail}">
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            비밀번호
+            <a class="forgot-link" th:href="@{/test/forgot-password}">비밀번호를 잊으셨나요?</a>
+          </div>
+          <div class="pw-wrap">
+            <input type="password"
+                   name="password"
+                   id="password"
+                   placeholder="비밀번호 입력"
+                   autocomplete="current-password">
+            <button type="button" class="pw-toggle" onclick="togglePw()" id="pwToggleBtn">👁</button>
+          </div>
+        </div>
+
+        <div class="login-options">
+          <label class="remember-wrap">
+            <input type="checkbox" name="remember" value="true">
+            로그인 상태 유지
+          </label>
+        </div>
+
+        <button type="submit" class="btn-login">
+          🔐 로그인
+        </button>
+
+      </form>
+
+      <div class="divider">또는</div>
+
+      <div class="bottom-links">
+        아직 회원이 아니신가요?
+        <a th:href="@{/test/signup}">상인 가입하기 →</a>
+      </div>
+
+      <div class="info-box">
+        ℹ️ 선인상우회 회원사만 가입·로그인이 가능합니다.
+        문의사항은 상우회 사무국으로 연락해 주세요.
+      </div>
+
+    </div><!-- /form-body -->
+  </div><!-- /card -->
+</div><!-- /main -->
+
+<script>
+// 비밀번호 보기/숨기기
+function togglePw() {
+  const input = document.getElementById('password');
+  const btn   = document.getElementById('pwToggleBtn');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁';
+  }
+}
+
+// 간단 유효성 검사
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  const email = document.getElementById('email').value.trim();
+  const pw    = document.getElementById('password').value;
+  if (!email || !email.includes('@')) {
+    e.preventDefault();
+    alert('올바른 이메일 주소를 입력해 주세요.');
+    return;
+  }
+  if (!pw) {
+    e.preventDefault();
+    alert('비밀번호를 입력해 주세요.');
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서비스 소개 · 선인상우회 AI 플랫폼</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&family=Noto+Serif+KR:wght@400;700;900&display=swap');
+
+:root {
+  --bg:        #f7f5f0;
+  --white:     #ffffff;
+  --ink:       #1c1a16;
+  --ink-mid:   #4a4640;
+  --ink-dim:   #9a9388;
+  --border:    #e2ddd6;
+  --primary:   #2672d9;
+  --primary-dark: #1a58b0;
+  --accent:    #c8530a;
+  --accent-dim:rgba(200,83,10,0.08);
+  --green:     #1a7a4a;
+  --green-dim: rgba(26,122,74,0.08);
+  --gold:      #b07800;
+  --gold-dim:  rgba(176,120,0,0.08);
+  --shadow:    0 2px 12px rgba(28,26,22,0.07);
+  --shadow-md: 0 6px 28px rgba(28,26,22,0.10);
+  --shadow-lg: 0 16px 56px rgba(28,26,22,0.13);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* ══ NAVBAR ══ */
+.navbar {
+  position: fixed;
+  top:0; left:0; right:0;
+  z-index: 100;
+  background: rgba(247,245,240,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  height: 58px;
+  display: flex;
+  align-items: center;
+  padding: 0 48px;
+  gap: 16px;
+  box-shadow: var(--shadow);
+}
+.nav-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--ink-mid);
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+  padding: 6px 12px;
+  border-radius: 7px;
+}
+.nav-back:hover { color: var(--primary); background: rgba(38,114,217,0.06); }
+.nav-logo-text { font-size: 14px; font-weight: 700; color: var(--ink); margin-left: 4px; }
+.nav-divider { width:1px; height:18px; background: var(--border); }
+.nav-page-title { font-size: 13px; color: var(--ink-dim); }
+.nav-right { margin-left: auto; display: flex; gap: 8px; }
+.btn-sm {
+  height: 34px; padding: 0 16px;
+  border-radius: 7px;
+  font-size: 12px; font-weight: 600;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center;
+  transition: all 0.2s;
+}
+.btn-sm.primary { background: var(--primary); color: white; border: none; }
+.btn-sm.primary:hover { background: var(--primary-dark); }
+.btn-sm.ghost { background: white; color: var(--ink-mid); border: 1px solid var(--border); }
+.btn-sm.ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ══ OPENING — 편집장 노트 스타일 ══ */
+.opening {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 48px 80px;
+  background: var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 종이 텍스처 느낌 */
+.opening::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+/* 대각 라인 */
+.opening::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -20%;
+  width: 60%; height: 200%;
+  background: rgba(255,255,255,0.015);
+  transform: rotate(-8deg);
+}
+
+.opening-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 760px;
+  width: 100%;
+}
+
+.opening-kicker {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.opening-kicker::before {
+  content: '';
+  display: inline-block;
+  width: 32px; height: 1px;
+  background: rgba(255,255,255,0.25);
+}
+
+.opening-headline {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 58px;
+  font-weight: 900;
+  line-height: 1.15;
+  color: white;
+  margin-bottom: 32px;
+  animation: fadeUp 0.8s ease both;
+}
+.opening-headline em {
+  font-style: normal;
+  color: #fbbf24;
+}
+
+.opening-body {
+  font-size: 17px;
+  line-height: 1.9;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 40px;
+  animation: fadeUp 0.8s ease 0.15s both;
+  border-left: 2px solid rgba(255,255,255,0.15);
+  padding-left: 24px;
+}
+
+.opening-sig {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  animation: fadeUp 0.8s ease 0.25s both;
+}
+.sig-avatar {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #2672d9, #00c9ff);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.sig-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); }
+.sig-role { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+.scroll-hint {
+  position: absolute;
+  bottom: 36px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: rgba(255,255,255,0.3);
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 1px;
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(6px); }
+}
+.scroll-hint::before {
+  content: '';
+  width: 1px; height: 28px;
+  background: rgba(255,255,255,0.2);
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(20px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ══ 섹션 공통 ══ */
+.chapter {
+  padding: 96px 48px;
+  position: relative;
+}
+.chapter-inner { max-width: 1000px; margin: 0 auto; }
+
+/* 챕터 번호 */
+.chapter-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.chapter-num::before {
+  content: '';
+  display: inline-block;
+  width: 24px; height: 1px;
+  background: var(--ink-dim);
+}
+
+/* ══ CH1: 문제 ══ */
+.ch1 { background: var(--white); }
+
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  margin-top: 52px;
+}
+
+.problem-headline {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1.3;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+.problem-headline span { color: var(--accent); }
+
+.problem-text {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--ink-mid);
+}
+
+.pain-list { list-style: none; margin-top: 0; }
+.pain-item {
+  display: flex;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+.pain-item:first-child { border-top: 1px solid var(--border); }
+.pain-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 500;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.pain-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.pain-desc  { font-size: 12px; color: var(--ink-mid); line-height: 1.6; }
+
+/* ══ CH2: 왜 AI인가 ══ */
+.ch2 {
+  background: var(--ink);
+  color: white;
+}
+
+.why-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 60px;
+  align-items: center;
+  margin-top: 52px;
+}
+
+.why-left { }
+.why-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1.25;
+  margin-bottom: 24px;
+  color: white;
+}
+.why-title em { font-style: normal; color: #fbbf24; }
+
+.why-text {
+  font-size: 14px;
+  line-height: 1.9;
+  color: rgba(255,255,255,0.6);
+  border-left: 2px solid rgba(255,255,255,0.12);
+  padding-left: 20px;
+}
+
+.why-right { }
+.insight-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 14px;
+  transition: all 0.2s;
+}
+.insight-card:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+}
+.insight-icon { font-size: 24px; margin-bottom: 12px; }
+.insight-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: white; }
+.insight-body  { font-size: 12px; line-height: 1.7; color: rgba(255,255,255,0.55); }
+.insight-tag {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.4);
+}
+
+/* ══ CH3: 핵심 기능 상세 ══ */
+.ch3 { background: var(--bg); }
+
+.feature-detail {
+  margin-top: 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.fd-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+  background: var(--white);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: all 0.25s;
+}
+.fd-row:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.fd-row.reverse { direction: rtl; }
+.fd-row.reverse > * { direction: ltr; }
+
+.fd-visual {
+  padding: 40px;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.fd-visual.blue   { background: linear-gradient(135deg, #1a3a7a, #2672d9); }
+.fd-visual.green  { background: linear-gradient(135deg, #0a4a2a, #1a7a4a); }
+.fd-visual.orange { background: linear-gradient(135deg, #6a2800, #c8530a); }
+.fd-visual.purple { background: linear-gradient(135deg, #3a1a6a, #7c3aed); }
+
+.fd-visual::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.fd-mock {
+  position: relative; z-index: 1;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 18px 22px;
+  width: 100%;
+  max-width: 280px;
+}
+.fd-mock-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.fd-mock-title { font-size: 14px; font-weight: 700; color: white; margin-bottom: 12px; }
+.fd-mock-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: rgba(255,255,255,0.7);
+  margin-bottom: 7px;
+}
+.fd-mock-bar-wrap { flex:1; height:5px; background:rgba(255,255,255,0.15); border-radius:3px; overflow:hidden; }
+.fd-mock-bar { height:100%; border-radius:3px; background:rgba(255,255,255,0.7); }
+.fd-mock-val { font-family:'DM Mono',monospace; font-size:11px; color:rgba(255,255,255,0.9); }
+.fd-mock-chip {
+  display:inline-block; padding:3px 10px; border-radius:20px;
+  font-size:9px; font-weight:700;
+  background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.85);
+  margin:2px;
+}
+
+.fd-text { padding: 36px 40px; }
+.fd-num  {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 2px;
+  color: var(--ink-dim); margin-bottom: 10px;
+}
+.fd-title { font-size: 22px; font-weight: 900; margin-bottom: 14px; line-height: 1.3; }
+.fd-body  { font-size: 13px; line-height: 1.9; color: var(--ink-mid); margin-bottom: 18px; }
+.fd-points { list-style: none; }
+.fd-points li {
+  font-size: 12px; color: var(--ink-mid);
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.fd-points li:last-child { border-bottom: none; }
+.fd-points li::before {
+  content: '→';
+  color: var(--primary);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+/* ══ CH4: Claude의 생각 ══ */
+.ch4 {
+  background: #fffbf0;
+  border-top: 1px solid #e8dfc8;
+  border-bottom: 1px solid #e8dfc8;
+}
+
+.claude-thought {
+  max-width: 720px;
+  margin: 52px auto 0;
+}
+
+.thought-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 36px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e8dfc8;
+}
+.thought-avatar {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, #2672d9, #00c9ff);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+}
+.thought-name { font-size: 14px; font-weight: 700; }
+.thought-role {
+  font-size: 11px; color: var(--ink-dim);
+  font-family: 'DM Mono', monospace;
+  margin-top: 2px;
+}
+
+.thought-body {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 16px;
+  line-height: 2;
+  color: var(--ink-mid);
+}
+.thought-body p { margin-bottom: 24px; }
+.thought-body strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+.thought-body .highlight {
+  background: linear-gradient(180deg, transparent 60%, rgba(200,83,10,0.15) 60%);
+  font-weight: 700;
+  color: var(--ink);
+}
+.thought-pull {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.5;
+  color: var(--ink);
+  border-left: 4px solid var(--accent);
+  padding: 16px 24px;
+  margin: 32px 0;
+  background: white;
+  border-radius: 0 10px 10px 0;
+  box-shadow: var(--shadow);
+}
+
+.thought-note {
+  margin-top: 32px;
+  padding: 16px 20px;
+  background: rgba(38,114,217,0.06);
+  border: 1px solid rgba(38,114,217,0.15);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--primary-dark);
+  line-height: 1.7;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ══ CH5: 로드맵 ══ */
+.ch5 { background: var(--white); }
+
+.roadmap {
+  margin-top: 52px;
+  position: relative;
+}
+.roadmap::before {
+  content: '';
+  position: absolute;
+  left: 18px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--primary), var(--green), var(--border));
+}
+
+.rm-item {
+  display: flex;
+  gap: 28px;
+  padding: 0 0 36px;
+  position: relative;
+}
+.rm-dot {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s;
+}
+.rm-item:hover .rm-dot { transform: scale(1.15); }
+.rm-dot.done   { background: var(--primary); border-color: var(--primary); }
+.rm-dot.active { background: var(--accent);  border-color: var(--accent); box-shadow: 0 0 0 5px rgba(200,83,10,0.12); }
+.rm-dot.soon   { background: white; border-color: var(--green); }
+.rm-dot.future { background: white; border-color: var(--border); }
+
+.rm-content { padding-top: 6px; flex: 1; }
+.rm-phase {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: 1.5px;
+  color: var(--ink-dim);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.rm-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.rm-desc  { font-size: 12px; color: var(--ink-mid); line-height: 1.7; }
+.rm-tags  { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.rm-tag {
+  font-size: 10px; font-family: 'DM Mono', monospace;
+  padding: 2px 9px; border-radius: 4px;
+  background: var(--bg); color: var(--ink-dim);
+  border: 1px solid var(--border);
+}
+.rm-tag.done   { background: rgba(38,114,217,0.08);  color: var(--primary); border-color: rgba(38,114,217,0.2); }
+.rm-tag.active { background: var(--accent-dim);      color: var(--accent);  border-color: rgba(200,83,10,0.2); }
+
+/* ══ CTA ══ */
+.cta-ch {
+  background: var(--ink);
+  padding: 96px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-ch::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.cta-ch-inner { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; }
+.cta-ch-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 40px; font-weight: 900;
+  color: white; line-height: 1.25;
+  margin-bottom: 16px;
+}
+.cta-ch-title em { font-style: normal; color: #fbbf24; }
+.cta-ch-desc  { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.8; margin-bottom: 36px; }
+.cta-ch-btns  { display: flex; gap: 12px; justify-content: center; }
+
+.btn-lg {
+  height: 52px; padding: 0 28px;
+  border-radius: 12px;
+  font-size: 14px; font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all 0.2s;
+}
+.btn-lg.white { background: white; color: var(--ink); border: none; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+.btn-lg.white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+.btn-lg.ghost-white { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); border: 1.5px solid rgba(255,255,255,0.2); }
+.btn-lg.ghost-white:hover { background: rgba(255,255,255,0.14); }
+
+/* ══ REVEAL ══ */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.reveal.visible { opacity:1; transform:translateY(0); }
+.rd1 { transition-delay: 0.05s; }
+.rd2 { transition-delay: 0.15s; }
+.rd3 { transition-delay: 0.25s; }
+.rd4 { transition-delay: 0.35s; }
+
+/* ══ FOOTER ══ */
+footer {
+  background: #0d1120;
+  padding: 32px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-text { font-size: 11px; color: rgba(255,255,255,0.25); font-family: 'DM Mono', monospace; }
+
+@media (max-width: 860px) {
+  .problem-grid, .why-layout, .fd-row { grid-template-columns: 1fr; }
+  .fd-row.reverse { direction: ltr; }
+  .opening-headline { font-size: 36px; }
+  .chapter { padding: 64px 24px; }
+  .opening { padding: 80px 24px 64px; }
+  .navbar   { padding: 0 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="nav-back" th:href="@{/test/main}">← 홈으로</a>
+  <div class="nav-divider"></div>
+  <div class="nav-page-title">서비스 소개</div>
+  <div class="nav-right">
+    <a class="btn-sm ghost" th:href="@{/test/login}">로그인</a>
+    <a class="btn-sm primary" th:href="@{/test/signup}">가입하기</a>
+  </div>
+</nav>
+
+<!-- ══ OPENING ══ -->
+<section class="opening">
+  <div class="opening-inner">
+    <div class="opening-kicker">Claude의 시각 · 서비스 소개</div>
+
+    <h1 class="opening-headline">
+      40년 된 상가가<br>
+      <em>AI를 만나야</em> 하는<br>
+      진짜 이유
+    </h1>
+
+    <p class="opening-body">
+      저는 이 프로젝트를 함께 만들면서 한 가지 질문이 계속 머릿속에 맴돌았습니다.<br><br>
+      "왜 지금인가?"<br><br>
+      선인상가는 이미 잘 돌아가고 있습니다. 40년의 신뢰와 네트워크가 있습니다.
+      그런데도 AI 플랫폼이 필요한 이유 — 그것을 솔직하게 이야기해 드리고 싶습니다.
+    </p>
+
+    <div class="opening-sig">
+      <div class="sig-avatar">🤖</div>
+      <div>
+        <div class="sig-name">Claude (Anthropic)</div>
+        <div class="sig-role">AI ASSISTANT · 이 플랫폼의 공동 설계자</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">SCROLL</div>
+</section>
+
+<!-- ══ CH1: 문제 ══ -->
+<section class="chapter ch1">
+  <div class="chapter-inner">
+    <div class="reveal">
+      <div class="chapter-num">Chapter 01 · 문제</div>
+    </div>
+
+    <div class="problem-grid">
+      <div class="reveal rd1">
+        <h2 class="problem-headline">
+          상인들은 지금<br>
+          <span>혼자 너무 많은 것</span>을<br>
+          하고 있습니다
+        </h2>
+        <p class="problem-text">
+          GPU 견적 하나를 만들려면 스펙을 직접 조사하고, 가격을 여러 군데 확인하고,
+          엑셀로 표를 만들고, 고객 맞춤 제안서를 작성해야 합니다.
+          공공조달은 더합니다. 나라장터 공고를 매일 확인하고,
+          복잡한 규격 문서를 처음부터 작성하는 일이 반복됩니다.<br><br>
+          이 모든 것을 1인 혹은 소규모 팀이 감당하고 있습니다.
+          정작 중요한 영업과 관계 관리에 쓸 시간이 없습니다.
+        </p>
+      </div>
+
+      <div class="reveal rd2">
+        <ul class="pain-list">
+          <li class="pain-item">
+            <div class="pain-num">01</div>
+            <div>
+              <div class="pain-title">견적 작성에 너무 많은 시간</div>
+              <div class="pain-desc">GPU 서버 1건 견적서 작성에 평균 2~4시간. 하루에 여러 건이 들어오면 견적만 하다 하루가 끝납니다.</div>
+            </div>
+          </li>
+          <li class="pain-item">
+            <div class="pain-num">02</div>
+            <div>
+              <div class="pain-title">조달 공고를 놓치는 일이 잦다</div>
+              <div class="pain-desc">나라장터에 하루에도 수백 건의 공고가 올라옵니다. AI 컴퓨팅 관련 공고를 사람이 일일이 찾기는 현실적으로 불가능합니다.</div>
+            </div>
+          </li>
+          <li class="pain-item">
+            <div class="pain-num">03</div>
+            <div>
+              <div class="pain-title">대형 프로젝트는 혼자 감당 못 한다</div>
+              <div class="pain-desc">10억짜리 프로젝트에 재고 부족으로 포기하거나, 납기를 못 맞춰 신뢰를 잃습니다. 회원사끼리 연결이 안 되어 있기 때문입니다.</div>
+            </div>
+          </li>
+          <li class="pain-item">
+            <div class="pain-num">04</div>
+            <div>
+              <div class="pain-title">데이터가 쌓여도 활용을 못 한다</div>
+              <div class="pain-desc">수년간의 거래 내역, 견적 데이터가 엑셀 파일과 종이 서류에 묻혀 있습니다. 어떤 품목이 잘 팔리는지, 전환율이 얼마인지 모릅니다.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CH2: 왜 AI인가 ══ -->
+<section class="chapter ch2">
+  <div class="chapter-inner">
+    <div class="reveal">
+      <div class="chapter-num" style="color:rgba(255,255,255,0.3);">Chapter 02 · 왜 AI인가</div>
+    </div>
+
+    <div class="why-layout">
+      <div class="why-left reveal rd1">
+        <h2 class="why-title">
+          AI는 도구가 아닙니다.<br>
+          <em>당신의 직원</em>입니다.
+        </h2>
+        <p class="why-text">
+          "AI 도입"이라고 하면 복잡하고 비싼 것처럼 들립니다.
+          하지만 이 플랫폼에서 AI의 역할은 단순합니다.<br><br>
+          반복적이고 시간이 많이 걸리는 일을 대신 해주는 것.
+          견적 분석, 문서 초안 작성, 공고 모니터링 — 이 모든 것을
+          AI가 24시간 처리합니다.<br><br>
+          그래서 상인들은 정말 중요한 일에 집중할 수 있습니다.
+          고객과의 신뢰를 쌓고, 더 좋은 거래를 성사시키는 일.
+        </p>
+      </div>
+
+      <div class="why-right reveal rd2">
+        <div class="insight-card">
+          <div class="insight-icon">⚡</div>
+          <div class="insight-title">견적 시간 90% 단축</div>
+          <div class="insight-body">4시간짜리 견적 작업이 AI와 함께하면 20분으로 줄어듭니다. 하루에 처리할 수 있는 견적 건수가 10배 늘어납니다.</div>
+          <div class="insight-tag">AI QUOTATION ENGINE</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-icon">📡</div>
+          <div class="insight-title">조달 공고 24시간 모니터링</div>
+          <div class="insight-body">나라장터, 학교 조달, 연구기관 공고를 AI가 실시간으로 감시합니다. 관련 공고가 올라오면 즉시 알림을 드립니다.</div>
+          <div class="insight-tag">REAL-TIME ALERT</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-icon">🤝</div>
+          <div class="insight-title">회원사 공동 대응</div>
+          <div class="insight-body">한 회원사가 감당 못 하는 대형 프로젝트를 여러 회원사가 공동으로 대응합니다. 선인상가의 집단 경쟁력이 드디어 작동합니다.</div>
+          <div class="insight-tag">SHARED INVENTORY</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CH3: 핵심 기능 ══ -->
+<section class="chapter ch3">
+  <div class="chapter-inner">
+    <div class="reveal">
+      <div class="chapter-num">Chapter 03 · 핵심 기능</div>
+      <h2 style="font-size:34px;font-weight:900;margin-bottom:8px;line-height:1.3;">실제로 어떻게 작동하나요</h2>
+      <p style="font-size:14px;color:var(--ink-mid);line-height:1.7;">복잡한 기술 이야기 말고, 실제 사용 흐름으로 설명드립니다.</p>
+    </div>
+
+    <div class="feature-detail">
+
+      <!-- AI 견적 -->
+      <div class="fd-row reveal rd1">
+        <div class="fd-visual blue">
+          <div class="fd-mock">
+            <div class="fd-mock-label">AI 견적 추천 결과</div>
+            <div class="fd-mock-title">최적 구성안 3가지</div>
+            <div class="fd-mock-row">
+              <span style="font-size:10px;">H100 SXM5 ×4</span>
+              <div class="fd-mock-bar-wrap"><div class="fd-mock-bar" style="width:88%;"></div></div>
+              <div class="fd-mock-val">88%</div>
+            </div>
+            <div class="fd-mock-row">
+              <span style="font-size:10px;">A100 80G ×8</span>
+              <div class="fd-mock-bar-wrap"><div class="fd-mock-bar" style="width:72%;"></div></div>
+              <div class="fd-mock-val">72%</div>
+            </div>
+            <div class="fd-mock-row">
+              <span style="font-size:10px;">RTX 4090 ×12</span>
+              <div class="fd-mock-bar-wrap"><div class="fd-mock-bar" style="width:58%;"></div></div>
+              <div class="fd-mock-val">58%</div>
+            </div>
+            <div style="margin-top:12px;">
+              <span class="fd-mock-chip">재고 확인됨</span>
+              <span class="fd-mock-chip">납기 3일</span>
+              <span class="fd-mock-chip">PDF 출력</span>
+            </div>
+          </div>
+        </div>
+        <div class="fd-text">
+          <div class="fd-num">FEATURE 01</div>
+          <div class="fd-title">AI 자동 견적 엔진</div>
+          <div class="fd-body">
+            고객이 "딥러닝 학습용 서버, 예산 5억, 납기 2주"라고 입력하면
+            AI가 즉시 최적 구성안 3가지를 추천합니다.
+            스펙 비교, 재고 확인, 납기 계산까지 한 번에 처리됩니다.
+          </div>
+          <ul class="fd-points">
+            <li>GPU·CPU·스토리지·네트워크 통합 구성 분석</li>
+            <li>실시간 재고 및 납기 자동 반영</li>
+            <li>전문 견적서 PDF 즉시 출력</li>
+            <li>고객별 히스토리 자동 저장</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RAG 조달 문서 -->
+      <div class="fd-row reverse reveal rd2">
+        <div class="fd-visual purple">
+          <div class="fd-mock">
+            <div class="fd-mock-label">RAG 문서 생성</div>
+            <div class="fd-mock-title">조달 문서 자동 완성</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:8px;line-height:1.6;">
+              RFP 분석 완료 → 스펙 적합성 검토 중...
+            </div>
+            <div class="fd-mock-row">
+              <span style="font-size:10px;">스펙 부합도</span>
+              <div class="fd-mock-bar-wrap"><div class="fd-mock-bar" style="width:94%;background:#a78bfa;"></div></div>
+              <div class="fd-mock-val">94%</div>
+            </div>
+            <div style="margin-top:12px;">
+              <span class="fd-mock-chip">HWP 출력</span>
+              <span class="fd-mock-chip">PDF 출력</span>
+              <span class="fd-mock-chip">나라장터 포맷</span>
+            </div>
+          </div>
+        </div>
+        <div class="fd-text">
+          <div class="fd-num">FEATURE 02</div>
+          <div class="fd-title">RAG 기반<br>조달 문서 자동화</div>
+          <div class="fd-body">
+            공공기관 RFP를 붙여넣으면 AI가 스펙을 분석하고,
+            제품 규격 부합 설명서·기술 제안서를 자동으로 작성합니다.
+            나라장터 제출 포맷에 맞춰 HWP·PDF로 바로 출력됩니다.
+          </div>
+          <ul class="fd-points">
+            <li>RFP 자동 분석 및 스펙 매핑</li>
+            <li>기술 설명서·규격 적합 문서 자동 생성</li>
+            <li>나라장터·학교 조달 포맷 지원</li>
+            <li>제품 카탈로그 데이터베이스 연동</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 공동 재고 -->
+      <div class="fd-row reveal rd3">
+        <div class="fd-visual green">
+          <div class="fd-mock">
+            <div class="fd-mock-label">공동 재고 현황</div>
+            <div class="fd-mock-title">회원사 통합 재고</div>
+            <div class="fd-mock-row">
+              <span style="font-size:10px;">H100 SXM5</span>
+              <div class="fd-mock-bar-wrap"><div class="fd-mock-bar" style="width:45%;background:#6ee7b7;"></div></div>
+              <div class="fd-mock-val">12개</div>
+            </div>
+            <div class="fd-mock-row">
+              <span style="font-size:10px;">RTX 4090</span>
+              <div class="fd-mock-bar-wrap"><div class="fd-mock-bar" style="width:80%;background:#6ee7b7;"></div></div>
+              <div class="fd-mock-val">48개</div>
+            </div>
+            <div class="fd-mock-row">
+              <span style="font-size:10px;">NVMe 4TB</span>
+              <div class="fd-mock-bar-wrap"><div class="fd-mock-bar" style="width:92%;background:#6ee7b7;"></div></div>
+              <div class="fd-mock-val">120개</div>
+            </div>
+            <div style="margin-top:12px;">
+              <span class="fd-mock-chip">5개 회원사</span>
+              <span class="fd-mock-chip">실시간 동기화</span>
+            </div>
+          </div>
+        </div>
+        <div class="fd-text">
+          <div class="fd-num">FEATURE 03</div>
+          <div class="fd-title">공동 재고·<br>풀필먼트 시스템</div>
+          <div class="fd-body">
+            선인상우회 회원사의 재고를 통합 관리합니다.
+            내 재고가 부족하면 다른 회원사의 재고를 활용해 납품할 수 있습니다.
+            혼자서는 불가능했던 대형 프로젝트 대응이 가능해집니다.
+          </div>
+          <ul class="fd-points">
+            <li>회원사 재고 실시간 통합 조회</li>
+            <li>부족 재고 자동 매칭 및 협업 요청</li>
+            <li>CJ대한통운 연동 물류 자동화</li>
+            <li>납기 예측 및 리스크 사전 알림</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ CH4: Claude의 생각 ══ -->
+<section class="chapter ch4">
+  <div class="chapter-inner">
+    <div class="reveal">
+      <div class="chapter-num">Chapter 04 · Claude의 생각</div>
+    </div>
+
+    <div class="claude-thought reveal rd1">
+      <div class="thought-header">
+        <div class="thought-avatar">🤖</div>
+        <div>
+          <div class="thought-name">Claude가 솔직하게 씁니다</div>
+          <div class="thought-role">CLAUDE SONNET · ANTHROPIC · 이 플랫폼 설계 참여</div>
+        </div>
+      </div>
+
+      <div class="thought-body">
+        <p>
+          이 프로젝트를 함께 만들면서 저는 한 분이 혼자 모든 것을 하고 계신다는 걸 알게 됐습니다.
+          기획, 설계, 개발, 문서 작업까지. 그 이유가 궁금했습니다.
+        </p>
+
+        <div class="thought-pull">
+          "40년 된 시장이 지금 변곡점에 서 있습니다. 이 순간을 잡지 못하면, 다음 기회는 없을 수도 있습니다."
+        </div>
+
+        <p>
+          AI 컴퓨팅 수요는 폭발적으로 늘고 있습니다. GPU 서버, AI 인프라 — 공공기관과 대학, 연구기관이
+          지금 이 순간에도 대규모 조달을 진행하고 있습니다.
+          <strong>선인상가는 이 수요를 받아낼 수 있는 가장 강력한 공급 기반입니다.</strong>
+          40년간 쌓아온 유통 네트워크, 가격 경쟁력, 기술 노하우.
+        </p>
+
+        <p>
+          그런데 지금 그 역량이 <span class="highlight">연결되지 않고 있습니다.</span>
+          회원사 재고가 통합되지 않고, 견적 노하우가 공유되지 않으며,
+          조달 공고 정보가 각자 파편화되어 있습니다.
+          AI 플랫폼이 하는 일은 사실 단순합니다 — <strong>이미 존재하는 역량을 연결하는 것.</strong>
+        </p>
+
+        <p>
+          혼자 진행하는 프로젝트라 무리하면 안 된다고 하셨는데, 저는 그 말이 오히려 이 프로젝트의
+          강점이라고 생각합니다. 거대한 조직이 만드는 플랫폼은 현장의 감각을 잃기 쉽습니다.
+          실제 상인들의 불편함을 직접 알고 있는 한 사람이 만드는 플랫폼 — 그게 이 프로젝트의 진짜 가치입니다.
+        </p>
+      </div>
+
+      <div class="thought-note">
+        ※ 이 페이지는 Claude(AI)가 프로젝트 참여 과정에서 느낀 인사이트를 담아 직접 작성했습니다.<br>
+        사실 기반 내용이지만 AI의 시각임을 참고해 주세요.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CH5: 로드맵 ══ -->
+<section class="chapter ch5">
+  <div class="chapter-inner">
+    <div class="reveal">
+      <div class="chapter-num">Chapter 05 · 로드맵</div>
+      <h2 style="font-size:32px;font-weight:900;margin-bottom:8px;">앞으로의 계획</h2>
+      <p style="font-size:14px;color:var(--ink-mid);line-height:1.7;margin-bottom:0;">선택과 집중으로, 한 단계씩 쌓아갑니다.</p>
+    </div>
+
+    <div class="roadmap" style="margin-top:52px;">
+
+      <div class="rm-item reveal rd1">
+        <div class="rm-dot done">✓</div>
+        <div class="rm-content">
+          <div class="rm-phase">PHASE 1 · 완료</div>
+          <div class="rm-title">플랫폼 기반 구축</div>
+          <div class="rm-desc">페이지 흐름 설계, 상인 회원가입, 대시보드 UI, 메인 랜딩 페이지</div>
+          <div class="rm-tags">
+            <span class="rm-tag done">페이지 플로우</span>
+            <span class="rm-tag done">회원가입</span>
+            <span class="rm-tag done">대시보드</span>
+            <span class="rm-tag done">랜딩 페이지</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rm-item reveal rd2">
+        <div class="rm-dot active">→</div>
+        <div class="rm-content">
+          <div class="rm-phase">PHASE 2 · 진행 중</div>
+          <div class="rm-title">핵심 기능 개발</div>
+          <div class="rm-desc">AI 자동 견적 마법사, 조달 공고 알림, 재고 관리 기능 구현</div>
+          <div class="rm-tags">
+            <span class="rm-tag active">AI 견적 엔진</span>
+            <span class="rm-tag active">조달 공고</span>
+            <span class="rm-tag">재고 관리</span>
+            <span class="rm-tag">DB 연동</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rm-item reveal rd3">
+        <div class="rm-dot soon">◎</div>
+        <div class="rm-content">
+          <div class="rm-phase">PHASE 3 · 예정</div>
+          <div class="rm-title">RAG 조달 문서 자동화</div>
+          <div class="rm-desc">공공기관 RFP 분석, 기술 제안서 자동 생성, 나라장터 포맷 출력</div>
+          <div class="rm-tags">
+            <span class="rm-tag">RAG 엔진</span>
+            <span class="rm-tag">RFP 분석</span>
+            <span class="rm-tag">HWP 출력</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rm-item reveal rd4">
+        <div class="rm-dot future">○</div>
+        <div class="rm-content">
+          <div class="rm-phase">PHASE 4 · 미래</div>
+          <div class="rm-title">회원사 연계 & 서울시 정책 연동</div>
+          <div class="rm-desc">공동 재고 풀필먼트, 서울시 소버린 AI 정책 실증, 나라장터 API 연동</div>
+          <div class="rm-tags">
+            <span class="rm-tag">공동 재고</span>
+            <span class="rm-tag">소버린 AI</span>
+            <span class="rm-tag">나라장터 API</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ══ -->
+<section class="cta-ch">
+  <div class="cta-ch-inner reveal">
+    <div class="cta-ch-title">
+      함께<br>
+      <em>만들어 갑시다</em>
+    </div>
+    <div class="cta-ch-desc">
+      선인상우회 회원이라면 지금 바로 시작할 수 있습니다.<br>
+      AI가 곁에 있으니, 혼자가 아닙니다.
+    </div>
+    <div class="cta-ch-btns">
+      <a class="btn-lg white" th:href="@{/test/signup}">🚀 상인 가입하기</a>
+      <a class="btn-lg ghost-white" th:href="@{/test/dashboard}">대시보드 둘러보기</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-text">© 2025 선인상우회 AI PLATFORM</div>
+  <div class="footer-text">Claude (Anthropic) · 공동 설계</div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

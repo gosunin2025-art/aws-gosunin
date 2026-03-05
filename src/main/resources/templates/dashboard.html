@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상인 대시보드 · 선인상우회 AI 플랫폼</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:      #f0f3f9;
+  --white:   #ffffff;
+  --border:  #dde2ee;
+  --primary: #2672d9;
+  --primary-dark: #1a58b0;
+  --primary-dim:  rgba(38,114,217,0.08);
+  --green:   #00a870;
+  --green-dim: rgba(0,168,112,0.09);
+  --orange:  #d96b20;
+  --orange-dim: rgba(217,107,32,0.09);
+  --purple:  #7c3aed;
+  --purple-dim: rgba(124,58,237,0.09);
+  --red:     #c0354e;
+  --red-dim: rgba(192,53,78,0.09);
+  --yellow:  #b07800;
+  --yellow-dim: rgba(176,120,0,0.09);
+  --text:    #1a1e2e;
+  --text-mid:#525c7a;
+  --text-dim:#8b93b0;
+  --shadow:  0 2px 10px rgba(38,60,120,0.07);
+  --shadow-md: 0 4px 20px rgba(38,60,120,0.10);
+  --sidebar-w: 220px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ══ SIDEBAR ══ */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 50;
+  box-shadow: 2px 0 12px rgba(38,60,120,0.05);
+}
+
+.sidebar-logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  background: var(--primary-dim);
+  color: var(--primary);
+  border: 1px solid rgba(38,114,217,0.2);
+  padding: 3px 8px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.sidebar-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.sidebar-sub   { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+/* 상인 프로필 미니카드 */
+.sidebar-profile {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.avatar {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #2672d9, #00c9ff);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.profile-name { font-size: 12px; font-weight: 700; }
+.profile-role {
+  font-size: 10px;
+  color: var(--green);
+  background: var(--green-dim);
+  border-radius: 10px;
+  padding: 1px 7px;
+  display: inline-block;
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+/* 사이드 메뉴 */
+.sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+.nav-section-label {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  padding: 8px 10px 4px;
+  text-transform: uppercase;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-mid);
+  margin-bottom: 2px;
+  text-decoration: none;
+}
+.nav-item:hover { background: var(--bg); color: var(--text); }
+.nav-item.active {
+  background: var(--primary-dim);
+  color: var(--primary);
+  font-weight: 700;
+}
+.nav-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--red);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-family: 'DM Mono', monospace;
+}
+.nav-badge.blue { background: var(--primary); }
+.nav-badge.green { background: var(--green); }
+
+.sidebar-footer {
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logout-btn {
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: color 0.2s;
+}
+.logout-btn:hover { color: var(--red); }
+
+/* ══ MAIN CONTENT ══ */
+.main-content {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 상단 바 */
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: var(--shadow);
+}
+.topbar-title { font-size: 15px; font-weight: 700; }
+.topbar-date {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: 'DM Mono', monospace;
+}
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.15s;
+  position: relative;
+}
+.icon-btn:hover { background: var(--bg); }
+.notif-dot {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 7px; height: 7px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 1.5px solid white;
+}
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 36px;
+  width: 220px;
+}
+.search-bar input {
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 12px;
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  width: 100%;
+}
+.search-bar input::placeholder { color: var(--text-dim); }
+
+/* ══ 대시보드 본문 ══ */
+.page { padding: 24px 28px 48px; }
+
+/* 환영 배너 */
+.welcome-banner {
+  background: linear-gradient(135deg, #2672d9 0%, #1348a0 60%, #0d3580 100%);
+  border-radius: 14px;
+  padding: 22px 28px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  right: -30px; top: -30px;
+  width: 160px; height: 160px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+.welcome-banner::after {
+  content: '';
+  position: absolute;
+  right: 60px; bottom: -50px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+.welcome-text { position: relative; z-index: 1; }
+.welcome-greeting { font-size: 13px; opacity: 0.75; margin-bottom: 4px; }
+.welcome-name { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.welcome-sub { font-size: 12px; opacity: 0.65; }
+.welcome-action {
+  position: relative; z-index: 1;
+  display: flex; gap: 10px;
+}
+.btn-banner {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  border: none;
+}
+.btn-banner.primary { background: white; color: var(--primary); }
+.btn-banner.primary:hover { background: #eef3ff; }
+.btn-banner.ghost { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); }
+.btn-banner.ghost:hover { background: rgba(255,255,255,0.22); }
+
+/* KPI 카드 그리드 */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.kpi-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  transition: all 0.2s;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 12px 12px 0 0;
+}
+.kpi-card.blue::after  { background: var(--primary); }
+.kpi-card.green::after { background: var(--green); }
+.kpi-card.orange::after{ background: var(--orange); }
+.kpi-card.purple::after{ background: var(--purple); }
+
+.kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.3px;
+}
+.kpi-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.kpi-icon.blue   { background: var(--primary-dim); }
+.kpi-icon.green  { background: var(--green-dim); }
+.kpi-icon.orange { background: var(--orange-dim); }
+.kpi-icon.purple { background: var(--purple-dim); }
+
+.kpi-value {
+  font-size: 26px;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1;
+}
+.kpi-unit { font-size: 13px; font-weight: 400; color: var(--text-dim); margin-left: 2px; }
+.kpi-change {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.kpi-change.up   { color: var(--green); }
+.kpi-change.down { color: var(--red); }
+.kpi-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+/* 섹션 타이틀 */
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-more {
+  font-size: 11px;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.section-more:hover { opacity: 0.7; }
+
+/* 2단 그리드 */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.three-col { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+/* 패널 카드 */
+.panel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.panel-head {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-title { font-size: 13px; font-weight: 700; }
+.panel-body  { padding: 14px 20px; }
+
+/* 견적 요청 테이블 */
+.req-table { width: 100%; border-collapse: collapse; }
+.req-table th {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  padding: 0 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.3px;
+}
+.req-table td {
+  padding: 11px 8px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--bg);
+  vertical-align: middle;
+}
+.req-table tr:last-child td { border-bottom: none; }
+.req-table tr:hover td { background: var(--bg); }
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.status-badge.new    { background: var(--primary-dim); color: var(--primary); }
+.status-badge.proc   { background: var(--orange-dim);  color: var(--orange); }
+.status-badge.done   { background: var(--green-dim);   color: var(--green); }
+.status-badge.urgent { background: var(--red-dim);     color: var(--red); }
+
+.req-amount {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* 재고 게이지 */
+.stock-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--bg);
+}
+.stock-item:last-child { border-bottom: none; }
+.stock-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+.stock-info { flex: 1; min-width: 0; }
+.stock-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.stock-detail { font-size: 10px; color: var(--text-dim); }
+.stock-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.stock-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+.stock-bar.high   { background: var(--green); }
+.stock-bar.mid    { background: var(--yellow); }
+.stock-bar.low    { background: var(--red); }
+.stock-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-mid);
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* 조달 공고 카드 */
+.notice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--bg);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.notice-item:last-child { border-bottom: none; }
+.notice-item:hover { background: var(--bg); margin: 0 -20px; padding: 12px 20px; border-radius: 8px; }
+.notice-tag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.5px;
+}
+.notice-tag.gov  { background: var(--primary-dim); color: var(--primary); }
+.notice-tag.res  { background: var(--purple-dim);  color: var(--purple); }
+.notice-tag.univ { background: var(--green-dim);   color: var(--green); }
+
+.notice-info { flex: 1; min-width: 0; }
+.notice-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notice-meta { font-size: 10px; color: var(--text-dim); }
+.notice-dday {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.notice-dday.urgent { color: var(--red); }
+.notice-dday.soon   { color: var(--orange); }
+.notice-dday.ok     { color: var(--text-dim); }
+
+/* 매출 차트 (CSS 바 차트) */
+.chart-wrap {
+  padding: 4px 0 0;
+}
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 100px;
+  margin-bottom: 8px;
+}
+.chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.chart-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--primary-dim);
+  border: 1px solid rgba(38,114,217,0.2);
+  transition: height 0.6s ease;
+  position: relative;
+  cursor: pointer;
+  min-height: 4px;
+}
+.chart-bar.current {
+  background: linear-gradient(180deg, #4d9fff, #2672d9);
+  border-color: var(--primary);
+}
+.chart-bar:hover::after {
+  content: attr(data-val);
+  position: absolute;
+  top: -24px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: white;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.chart-month {
+  font-size: 9px;
+  color: var(--text-dim);
+  font-family: 'DM Mono', monospace;
+}
+.chart-divider { height: 1px; background: var(--border); margin: 0 0 8px; }
+
+/* 전환율 링 */
+.conversion-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--bg);
+}
+.conversion-row:last-child { border-bottom: none; }
+.conv-label { font-size: 12px; flex: 1; font-weight: 500; }
+.conv-bar-wrap { flex: 2; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.conv-bar { height: 100%; border-radius: 4px; }
+.conv-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* 빠른 실행 버튼 */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.quick-btn {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.quick-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-dim);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.quick-icon {
+  font-size: 24px;
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.quick-label { font-size: 11px; font-weight: 600; color: var(--text-mid); text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-badge">AI PLATFORM</div>
+    <div class="sidebar-title">선인상우회</div>
+    <div class="sidebar-sub">AI 컴퓨팅 유통·견적 플랫폼</div>
+  </div>
+
+  <div class="sidebar-profile">
+    <div class="avatar">🏪</div>
+    <div>
+      <div class="profile-name">선인컴퓨터</div>
+      <div class="profile-role">✓ 상우회 인증</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">메인</div>
+    <a class="nav-item active" href="#">
+      <span class="nav-icon">🏠</span> 대시보드
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">🔔</span> 알림 센터
+      <span class="nav-badge">3</span>
+    </a>
+
+    <div class="nav-section-label" style="margin-top:8px;">견적·조달</div>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">📋</span> 견적 요청 현황
+      <span class="nav-badge blue">5</span>
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">🤖</span> AI 자동 견적
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">📄</span> 조달 문서 생성
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">📢</span> 조달 공고
+      <span class="nav-badge">2</span>
+    </a>
+
+    <div class="nav-section-label" style="margin-top:8px;">재고·물류</div>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">📦</span> 재고 관리
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">🚚</span> 주문·배송
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">🏭</span> 공동 재고 현황
+    </a>
+
+    <div class="nav-section-label" style="margin-top:8px;">분석·설정</div>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">📊</span> 매출 분석
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">👤</span> 내 프로필
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">⚙️</span> 설정
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <span style="font-family:'DM Mono',monospace;font-size:9px;">v1.0.0</span>
+    <button class="logout-btn">로그아웃</button>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<div class="main-content">
+
+  <!-- 상단 바 -->
+  <div class="topbar">
+    <div class="topbar-title">대시보드</div>
+    <div class="topbar-date" id="todayDate"></div>
+    <div class="topbar-right">
+      <div class="search-bar">
+        <span style="color:var(--text-dim);font-size:14px;">🔍</span>
+        <input type="text" placeholder="견적번호, 거래처 검색...">
+      </div>
+      <div class="icon-btn">
+        📢
+        <div class="notif-dot"></div>
+      </div>
+      <div class="icon-btn">⚙️</div>
+    </div>
+  </div>
+
+  <!-- 페이지 본문 -->
+  <div class="page">
+
+    <!-- 환영 배너 -->
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <div class="welcome-greeting">좋은 아침이에요 ☀️</div>
+        <div class="welcome-name">선인컴퓨터 님, 오늘도 화이팅!</div>
+        <div class="welcome-sub">오늘 신규 견적 요청이 <strong>2건</strong> 접수되었습니다. 조달 공고 마감도 확인해 보세요.</div>
+      </div>
+      <div class="welcome-action">
+        <button class="btn-banner primary" onclick="alert('AI 견적 페이지로 이동합니다')">🤖 AI 견적 시작</button>
+        <button class="btn-banner ghost" onclick="alert('조달 문서 생성 페이지로 이동합니다')">📄 조달 문서 생성</button>
+      </div>
+    </div>
+
+    <!-- 빠른 실행 -->
+    <div class="quick-grid">
+      <a class="quick-btn" href="#">
+        <div class="quick-icon" style="background:var(--primary-dim);">📋</div>
+        <div class="quick-label">견적 요청<br>확인하기</div>
+      </a>
+      <a class="quick-btn" href="#">
+        <div class="quick-icon" style="background:var(--green-dim);">📦</div>
+        <div class="quick-label">재고 현황<br>업데이트</div>
+      </a>
+      <a class="quick-btn" href="#">
+        <div class="quick-icon" style="background:var(--purple-dim);">📄</div>
+        <div class="quick-label">조달 문서<br>자동 생성</div>
+      </a>
+      <a class="quick-btn" href="#">
+        <div class="quick-icon" style="background:var(--orange-dim);">📢</div>
+        <div class="quick-label">신규 조달<br>공고 보기</div>
+      </a>
+    </div>
+
+    <!-- KPI 카드 -->
+    <div class="kpi-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-top">
+          <div class="kpi-label">견적 요청 (이번 달)</div>
+          <div class="kpi-icon blue">📋</div>
+        </div>
+        <div class="kpi-value">23<span class="kpi-unit">건</span></div>
+        <div class="kpi-change up">▲ +4건 <span style="font-weight:400;color:var(--text-dim);">vs 지난달</span></div>
+        <div class="kpi-sub">처리 중 5건 · 신규 2건</div>
+      </div>
+
+      <div class="kpi-card green">
+        <div class="kpi-top">
+          <div class="kpi-label">월 매출</div>
+          <div class="kpi-icon green">💰</div>
+        </div>
+        <div class="kpi-value">4.2<span class="kpi-unit">억</span></div>
+        <div class="kpi-change up">▲ +12.4% <span style="font-weight:400;color:var(--text-dim);">vs 지난달</span></div>
+        <div class="kpi-sub">목표 5억 대비 84% 달성</div>
+      </div>
+
+      <div class="kpi-card orange">
+        <div class="kpi-top">
+          <div class="kpi-label">견적 전환율</div>
+          <div class="kpi-icon orange">📈</div>
+        </div>
+        <div class="kpi-value">67<span class="kpi-unit">%</span></div>
+        <div class="kpi-change up">▲ +5.2%p <span style="font-weight:400;color:var(--text-dim);">vs 지난달</span></div>
+        <div class="kpi-sub">업계 평균 48% 대비 우수</div>
+      </div>
+
+      <div class="kpi-card purple">
+        <div class="kpi-top">
+          <div class="kpi-label">납기 준수율</div>
+          <div class="kpi-icon purple">🚚</div>
+        </div>
+        <div class="kpi-value">96<span class="kpi-unit">%</span></div>
+        <div class="kpi-change down">▼ -1%p <span style="font-weight:400;color:var(--text-dim);">vs 지난달</span></div>
+        <div class="kpi-sub">지연 1건 (재고 부족)</div>
+      </div>
+    </div>
+
+    <!-- 견적 요청 현황 + 조달 공고 -->
+    <div class="three-col">
+
+      <!-- 견적 요청 현황 -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">📋 견적 요청 현황</div>
+          <a class="section-more" href="#">전체보기 →</a>
+        </div>
+        <div class="panel-body" style="padding:0 20px;">
+          <table class="req-table">
+            <thead>
+              <tr>
+                <th>견적번호</th>
+                <th>거래처</th>
+                <th>내용</th>
+                <th>금액</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);">Q-2024-0089</td>
+                <td style="font-weight:600;">한국AI연구원</td>
+                <td style="color:var(--text-mid);">H100 서버 ×4</td>
+                <td class="req-amount">1.2억</td>
+                <td><span class="status-badge urgent">긴급</span></td>
+              </tr>
+              <tr>
+                <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);">Q-2024-0088</td>
+                <td style="font-weight:600;">서울대학교</td>
+                <td style="color:var(--text-mid);">RTX 4090 ×12</td>
+                <td class="req-amount">4,800만</td>
+                <td><span class="status-badge new">신규</span></td>
+              </tr>
+              <tr>
+                <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);">Q-2024-0087</td>
+                <td style="font-weight:600;">중소벤처기업부</td>
+                <td style="color:var(--text-mid);">GPU 서버 시스템</td>
+                <td class="req-amount">3.5억</td>
+                <td><span class="status-badge proc">처리중</span></td>
+              </tr>
+              <tr>
+                <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);">Q-2024-0086</td>
+                <td style="font-weight:600;">카카오엔터프라이즈</td>
+                <td style="color:var(--text-mid);">NVMe SSD ×50</td>
+                <td class="req-amount">2,200만</td>
+                <td><span class="status-badge proc">처리중</span></td>
+              </tr>
+              <tr>
+                <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);">Q-2024-0085</td>
+                <td style="font-weight:600;">ETRI 전자연구원</td>
+                <td style="color:var(--text-mid);">InfiniBand 스위치</td>
+                <td class="req-amount">8,500만</td>
+                <td><span class="status-badge done">완료</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 조달 공고 알림 -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">📢 조달 공고 알림</div>
+          <a class="section-more" href="#">더보기 →</a>
+        </div>
+        <div class="panel-body">
+          <div class="notice-item">
+            <span class="notice-tag gov">정부</span>
+            <div class="notice-info">
+              <div class="notice-title">과기부 AI 컴퓨팅 인프라 구축</div>
+              <div class="notice-meta">추정가 12억 · 나라장터</div>
+            </div>
+            <div class="notice-dday urgent">D-2</div>
+          </div>
+          <div class="notice-item">
+            <span class="notice-tag res">연구</span>
+            <div class="notice-info">
+              <div class="notice-title">KAIST GPU 서버 납품</div>
+              <div class="notice-meta">추정가 4.8억 · 학교 조달</div>
+            </div>
+            <div class="notice-dday soon">D-7</div>
+          </div>
+          <div class="notice-item">
+            <span class="notice-tag univ">대학</span>
+            <div class="notice-info">
+              <div class="notice-title">서울대 AI 학습 서버</div>
+              <div class="notice-meta">추정가 6.2억 · 나라장터</div>
+            </div>
+            <div class="notice-dday ok">D-14</div>
+          </div>
+          <div class="notice-item">
+            <span class="notice-tag gov">정부</span>
+            <div class="notice-info">
+              <div class="notice-title">중기부 스타트업 AI 장비</div>
+              <div class="notice-meta">추정가 2.1억 · 나라장터</div>
+            </div>
+            <div class="notice-dday ok">D-21</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 재고·납기 + 매출 차트 + 전환율 -->
+    <div class="two-col">
+
+      <!-- 재고·납기 현황 -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">📦 재고·납기 현황</div>
+          <a class="section-more" href="#">재고 관리 →</a>
+        </div>
+        <div class="panel-body">
+          <div class="stock-item">
+            <div class="stock-icon">🖥️</div>
+            <div class="stock-info">
+              <div class="stock-name">NVIDIA H100 SXM5</div>
+              <div class="stock-detail">납기 3~5일 · 단가 5,200만원</div>
+            </div>
+            <div style="flex:2;display:flex;align-items:center;gap:8px;">
+              <div class="stock-bar-wrap">
+                <div class="stock-bar mid" style="width:35%;"></div>
+              </div>
+              <div class="stock-count" style="color:var(--yellow);">7개</div>
+            </div>
+          </div>
+          <div class="stock-item">
+            <div class="stock-icon">🎮</div>
+            <div class="stock-info">
+              <div class="stock-name">NVIDIA RTX 4090</div>
+              <div class="stock-detail">납기 1~2일 · 단가 290만원</div>
+            </div>
+            <div style="flex:2;display:flex;align-items:center;gap:8px;">
+              <div class="stock-bar-wrap">
+                <div class="stock-bar high" style="width:78%;"></div>
+              </div>
+              <div class="stock-count" style="color:var(--green);">24개</div>
+            </div>
+          </div>
+          <div class="stock-item">
+            <div class="stock-icon">💾</div>
+            <div class="stock-info">
+              <div class="stock-name">Samsung NVMe 4TB</div>
+              <div class="stock-detail">납기 즉시 · 단가 42만원</div>
+            </div>
+            <div style="flex:2;display:flex;align-items:center;gap:8px;">
+              <div class="stock-bar-wrap">
+                <div class="stock-bar high" style="width:90%;"></div>
+              </div>
+              <div class="stock-count" style="color:var(--green);">56개</div>
+            </div>
+          </div>
+          <div class="stock-item">
+            <div class="stock-icon">🌐</div>
+            <div class="stock-info">
+              <div class="stock-name">Mellanox IB 스위치</div>
+              <div class="stock-detail">납기 7~14일 · 단가 1,800만원</div>
+            </div>
+            <div style="flex:2;display:flex;align-items:center;gap:8px;">
+              <div class="stock-bar-wrap">
+                <div class="stock-bar low" style="width:12%;"></div>
+              </div>
+              <div class="stock-count" style="color:var(--red);">2개</div>
+            </div>
+          </div>
+          <div class="stock-item">
+            <div class="stock-icon">🧠</div>
+            <div class="stock-info">
+              <div class="stock-name">AMD MI300X</div>
+              <div class="stock-detail">납기 2~3주 · 단가 3,800만원</div>
+            </div>
+            <div style="flex:2;display:flex;align-items:center;gap:8px;">
+              <div class="stock-bar-wrap">
+                <div class="stock-bar low" style="width:8%;"></div>
+              </div>
+              <div class="stock-count" style="color:var(--red);">3개</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측: 매출 차트 + 전환율 -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- 월별 매출 바 차트 -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">💰 월별 매출 추이</div>
+            <a class="section-more" href="#">분석 →</a>
+          </div>
+          <div class="panel-body">
+            <div class="chart-wrap">
+              <div class="chart-bars" id="salesChart"></div>
+              <div class="chart-divider"></div>
+              <div style="font-size:10px;color:var(--text-dim);display:flex;justify-content:space-between;">
+                <span>단위: 억원</span>
+                <span style="color:var(--primary);font-weight:700;">▶ 이번달 4.2억</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 견적 전환율 -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">📈 견적 전환율</div>
+          </div>
+          <div class="panel-body">
+            <div class="conversion-row">
+              <div class="conv-label">GPU 서버</div>
+              <div class="conv-bar-wrap">
+                <div class="conv-bar" style="width:78%;background:var(--primary);"></div>
+              </div>
+              <div class="conv-pct" style="color:var(--primary);">78%</div>
+            </div>
+            <div class="conversion-row">
+              <div class="conv-label">스토리지</div>
+              <div class="conv-bar-wrap">
+                <div class="conv-bar" style="width:65%;background:var(--green);"></div>
+              </div>
+              <div class="conv-pct" style="color:var(--green);">65%</div>
+            </div>
+            <div class="conversion-row">
+              <div class="conv-label">네트워크</div>
+              <div class="conv-bar-wrap">
+                <div class="conv-bar" style="width:52%;background:var(--orange);"></div>
+              </div>
+              <div class="conv-pct" style="color:var(--orange);">52%</div>
+            </div>
+            <div class="conversion-row">
+              <div class="conv-label">AI 가속기</div>
+              <div class="conv-bar-wrap">
+                <div class="conv-bar" style="width:41%;background:var(--purple);"></div>
+              </div>
+              <div class="conv-pct" style="color:var(--purple);">41%</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /page -->
+</div><!-- /main-content -->
+
+<script>
+// 오늘 날짜
+const d = new Date();
+const days = ['일','월','화','수','목','금','토'];
+document.getElementById('todayDate').textContent =
+  d.getFullYear() + '.' +
+  String(d.getMonth()+1).padStart(2,'0') + '.' +
+  String(d.getDate()).padStart(2,'0') + ' (' + days[d.getDay()] + ')';
+
+// 매출 바 차트 그리기
+const salesData = [
+  { month:'8월',  val: 2.8, cur: false },
+  { month:'9월',  val: 3.1, cur: false },
+  { month:'10월', val: 2.5, cur: false },
+  { month:'11월', val: 3.8, cur: false },
+  { month:'12월', val: 3.4, cur: false },
+  { month:'1월',  val: 2.9, cur: false },
+  { month:'2월',  val: 4.2, cur: true  },
+];
+const maxVal = Math.max(...salesData.map(d => d.val));
+const chart = document.getElementById('salesChart');
+salesData.forEach(item => {
+  const pct = Math.round((item.val / maxVal) * 90);
+  chart.innerHTML += `
+    <div class="chart-col">
+      <div class="chart-bar${item.cur ? ' current' : ''}"
+           style="height:${pct}px;"
+           data-val="${item.val}억"></div>
+      <div class="chart-month">${item.month}</div>
+    </div>`;
+});
+</script>
+</body>
+</html>

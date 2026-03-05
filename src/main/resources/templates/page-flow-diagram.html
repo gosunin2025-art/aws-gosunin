@@ -1,0 +1,714 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 컴퓨팅 유통·견적 자동화 플랫폼 - 페이지 흐름도</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg:        #f0f2f7;
+      --surface:   #ffffff;
+      --surface2:  #e8eaf2;
+      --border:    #d4d8e8;
+
+      --green:     #00a870;
+      --green-dim: rgba(0,168,112,0.10);
+      --green-border: rgba(0,168,112,0.30);
+
+      --orange:     #d96b20;
+      --orange-dim: rgba(217,107,32,0.10);
+      --orange-border: rgba(217,107,32,0.30);
+
+      --blue:     #2672d9;
+      --blue-dim: rgba(38,114,217,0.10);
+      --blue-border: rgba(38,114,217,0.30);
+
+      --purple:     #7c3aed;
+      --purple-dim: rgba(124,58,237,0.10);
+      --purple-border: rgba(124,58,237,0.30);
+
+      --yellow:     #b07800;
+      --yellow-dim: rgba(176,120,0,0.09);
+      --yellow-border: rgba(176,120,0,0.30);
+
+      --red:     #c0354e;
+      --red-dim: rgba(192,53,78,0.10);
+      --red-border: rgba(192,53,78,0.30);
+
+      --cyan:     #0077aa;
+      --cyan-dim: rgba(0,119,170,0.10);
+      --cyan-border: rgba(0,119,170,0.30);
+
+      --gray:     #4b5675;
+      --gray-dim: rgba(75,86,117,0.07);
+      --gray-border: rgba(75,86,117,0.20);
+
+      --text:     #1a1e2e;
+      --text-dim: #7a82a0;
+      --text-mid: #525c7a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      overflow-x: auto;
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: 22px 40px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      background: rgba(240,242,247,0.96);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    }
+
+    .header-badge {
+      background: var(--green-dim);
+      border: 1px solid var(--green-border);
+      color: var(--green);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .header-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .header-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-left: auto;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      gap: 18px;
+      padding: 12px 40px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      background: var(--surface);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      color: var(--text-mid);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* ── Canvas ── */
+    .canvas {
+      padding: 28px 40px 80px;
+      display: flex;
+      gap: 0;
+      align-items: flex-start;
+      min-width: max-content;
+    }
+
+    /* ── Column ── */
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 186px;
+      flex-shrink: 0;
+    }
+    .col-wide { width: 208px; }
+
+    .col-header {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 7px 12px;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-weight: 600;
+      text-align: center;
+      border: 1px solid transparent;
+    }
+
+    /* 컬럼 헤더 색상 */
+    .ch-green  { background: var(--green-dim);  color: var(--green);  border-color: var(--green-border); }
+    .ch-orange { background: var(--orange-dim); color: var(--orange); border-color: var(--orange-border); }
+    .ch-blue   { background: var(--blue-dim);   color: var(--blue);   border-color: var(--blue-border); }
+    .ch-purple { background: var(--purple-dim); color: var(--purple); border-color: var(--purple-border); }
+    .ch-yellow { background: var(--yellow-dim); color: var(--yellow); border-color: var(--yellow-border); }
+    .ch-red    { background: var(--red-dim);    color: var(--red);    border-color: var(--red-border); }
+    .ch-cyan   { background: var(--cyan-dim);   color: var(--cyan);   border-color: var(--cyan-border); }
+    .ch-gray   { background: var(--gray-dim);   color: var(--gray);   border-color: var(--gray-border); }
+
+    /* ── Group ── */
+    .group {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      background: var(--surface);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .note-tag {
+      font-size: 9px;
+      font-family: 'DM Mono', monospace;
+      background: var(--surface2);
+      color: var(--text-dim);
+      padding: 2px 7px;
+      border-radius: 3px;
+      display: inline-block;
+      letter-spacing: 0.8px;
+      width: fit-content;
+    }
+
+    /* ── Cards ── */
+    .card {
+      border-radius: 7px;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.4;
+      border: 1px solid transparent;
+      cursor: default;
+      transition: all 0.18s;
+    }
+    .card:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.08); }
+
+    .c-green  { background: var(--green-dim);  border-color: var(--green-border);  color: var(--green); }
+    .c-orange { background: var(--orange-dim); border-color: var(--orange-border); color: var(--orange); }
+    .c-blue   { background: var(--blue-dim);   border-color: var(--blue-border);   color: var(--blue); }
+    .c-purple { background: var(--purple-dim); border-color: var(--purple-border); color: var(--purple); }
+    .c-yellow { background: var(--yellow-dim); border-color: var(--yellow-border); color: var(--yellow); }
+    .c-red    { background: var(--red-dim);    border-color: var(--red-border);    color: var(--red); }
+    .c-cyan   { background: var(--cyan-dim);   border-color: var(--cyan-border);   color: var(--cyan); }
+    .c-gray   { background: var(--gray-dim);   border-color: var(--gray-border);   color: var(--gray); }
+
+    /* entry 강조 */
+    .c-green.entry  { border-width: 2px; font-weight: 700; box-shadow: 0 0 0 3px rgba(0,168,112,0.08); }
+    .c-orange.entry { border-width: 2px; font-weight: 700; box-shadow: 0 0 0 3px rgba(217,107,32,0.08); }
+    .c-blue.entry   { border-width: 2px; font-weight: 700; box-shadow: 0 0 0 3px rgba(38,114,217,0.08); }
+    .c-purple.entry { border-width: 2px; font-weight: 700; box-shadow: 0 0 0 3px rgba(124,58,237,0.08); }
+    .c-yellow.entry { border-width: 2px; font-weight: 700; box-shadow: 0 0 0 3px rgba(176,120,0,0.08); }
+    .c-red.entry    { border-width: 2px; font-weight: 700; box-shadow: 0 0 0 3px rgba(192,53,78,0.08); }
+    .c-cyan.entry   { border-width: 2px; font-weight: 700; box-shadow: 0 0 0 3px rgba(0,119,170,0.08); }
+    .c-gray.entry   { border-width: 2px; font-weight: 700; box-shadow: 0 0 0 3px rgba(75,86,117,0.08); }
+
+    .card-sub {
+      font-size: 10px;
+      opacity: 0.60;
+      font-weight: 400;
+      margin-top: 2px;
+      display: block;
+    }
+
+    /* ── Arrow ── */
+    .arrow-col {
+      display: flex;
+      align-items: flex-start;
+      padding-top: 54px;
+      flex-shrink: 0;
+      width: 26px;
+      justify-content: center;
+    }
+    .arrow-col svg { opacity: 0.35; }
+
+    /* ── Bottom bar ── */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.97);
+      border-top: 1px solid var(--border);
+      padding: 10px 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      box-shadow: 0 -1px 8px rgba(0,0,0,0.05);
+    }
+    .bb-green  { color: var(--green); }
+    .bb-purple { color: var(--purple); }
+    .bb-yellow { color: var(--yellow); }
+    .bb-sep    { color: var(--border); }
+    .bb-right  { margin-left: auto; color: var(--text-dim); }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-badge">PAGE FLOW</div>
+  <div class="header-title">AI 컴퓨팅 유통·견적 자동화 플랫폼</div>
+  <div class="header-sub">선인상우회 · 서울형 소버린 AI · v1.1</div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#00a870;"></div>
+    <span>진입 / 인증</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#d96b20;"></div>
+    <span>상인 대시보드</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#2672d9;"></div>
+    <span>자동 견적 엔진</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#7c3aed;"></div>
+    <span>RAG 조달 문서</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#b07800;"></div>
+    <span>재고·풀필먼트</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#0077aa;"></div>
+    <span>고객사 포털</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#c0354e;"></div>
+    <span>관리자·정책</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#4b5675;"></div>
+    <span>연동·공통</span>
+  </div>
+</div>
+
+<!-- CANVAS -->
+<div class="canvas">
+
+  <!-- ① 진입/인증 -->
+  <div class="col">
+    <div class="col-header ch-green">① 진입 / 인증</div>
+
+    <div class="group">
+      <div class="note-tag">LANDING</div>
+      <div class="card c-green entry">메인 랜딩 페이지
+        <span class="card-sub">플랫폼 소개 · 상가 소개</span>
+      </div>
+      <div class="card c-green">서비스 소개 페이지
+        <span class="card-sub">AI 견적 · 조달 · 유통 기능</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">AUTH</div>
+      <div class="card c-green">회원가입
+        <span class="card-sub">상인 / 고객사 구분</span>
+      </div>
+      <div class="card c-green">로그인
+        <span class="card-sub">이메일 · 사업자번호</span>
+      </div>
+      <div class="card c-green">비밀번호 찾기</div>
+      <div class="card c-green">2차 인증 (OTP)</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">ONBOARDING</div>
+      <div class="card c-green">상인 정보 등록
+        <span class="card-sub">사업자등록 · 취급품목</span>
+      </div>
+      <div class="card c-green">고객사 정보 등록
+        <span class="card-sub">기관명 · 담당자</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M4 10h12M12 6l4 4-4 4" stroke="#2672d9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- ② 상인 대시보드 -->
+  <div class="col">
+    <div class="col-header ch-orange">② 상인 대시보드</div>
+
+    <div class="group">
+      <div class="note-tag">HOME</div>
+      <div class="card c-orange entry">상인 홈 대시보드
+        <span class="card-sub">견적·주문·재고 요약</span>
+      </div>
+      <div class="card c-orange">알림 센터
+        <span class="card-sub">견적요청 · 납기 · 조달공고</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">PROFILE</div>
+      <div class="card c-orange">내 프로필 관리</div>
+      <div class="card c-orange">취급 품목 관리
+        <span class="card-sub">GPU · 서버 · 스토리지 · 네트워크</span>
+      </div>
+      <div class="card c-orange">가격표 관리</div>
+      <div class="card c-orange">공급사 연동 관리</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">ANALYTICS</div>
+      <div class="card c-orange">매출 분석</div>
+      <div class="card c-orange">견적 전환율 분석</div>
+      <div class="card c-orange">시장 트렌드 리포트</div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M4 10h12M12 6l4 4-4 4" stroke="#2672d9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- ③ AI 자동 견적 -->
+  <div class="col col-wide">
+    <div class="col-header ch-blue">③ AI 자동 견적 엔진</div>
+
+    <div class="group">
+      <div class="note-tag">ENTRY</div>
+      <div class="card c-blue entry">견적 요청 홈
+        <span class="card-sub">고객·상인 공통 진입</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">INPUT WIZARD</div>
+      <div class="card c-blue">Step 1 · 사용 목적 선택
+        <span class="card-sub">학습 / 추론 / 연구 / 서비스</span>
+      </div>
+      <div class="card c-blue">Step 2 · 규모·예산 입력</div>
+      <div class="card c-blue">Step 3 · 스펙 조건 설정
+        <span class="card-sub">GPU · CPU · 메모리 · 네트워크</span>
+      </div>
+      <div class="card c-blue">Step 4 · 납기 조건 입력</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">AI OUTPUT</div>
+      <div class="card c-blue">AI 구성안 추천 결과
+        <span class="card-sub">최적 3개 구성안 비교</span>
+      </div>
+      <div class="card c-blue">스펙 상세 비교 뷰
+        <span class="card-sub">벤치마크 · 전력 · 비용</span>
+      </div>
+      <div class="card c-blue">실시간 재고·납기 확인</div>
+      <div class="card c-blue">견적서 미리보기
+        <span class="card-sub">PDF 출력 · 공유 링크</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">ACTION</div>
+      <div class="card c-blue">견적 확정·저장</div>
+      <div class="card c-blue">견적 히스토리</div>
+      <div class="card c-blue">견적 비교 (다중)</div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M4 10h12M12 6l4 4-4 4" stroke="#2672d9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- ④ RAG 조달문서 -->
+  <div class="col col-wide">
+    <div class="col-header ch-purple">④ RAG 조달 문서 자동화</div>
+
+    <div class="group">
+      <div class="note-tag">KNOWLEDGE BASE</div>
+      <div class="card c-purple entry">조달 문서 센터
+        <span class="card-sub">문서 생성·관리 허브</span>
+      </div>
+      <div class="card c-purple">정책·규격 문서 검색
+        <span class="card-sub">조달청 · 부처 규격</span>
+      </div>
+      <div class="card c-purple">기술 자료 라이브러리
+        <span class="card-sub">GPU · 서버 데이터시트</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">AUTO-GENERATE</div>
+      <div class="card c-purple">제안요청서(RFP) 분석
+        <span class="card-sub">AI 자동 스펙 추출</span>
+      </div>
+      <div class="card c-purple">스펙 적합성 검증
+        <span class="card-sub">정책·규격 부합 여부</span>
+      </div>
+      <div class="card c-purple">기술 설명서 자동 생성
+        <span class="card-sub">RAG 기반 근거 포함</span>
+      </div>
+      <div class="card c-purple">가격 산출 근거서
+        <span class="card-sub">시장가 · 재고 연계</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">OUTPUT</div>
+      <div class="card c-purple">공공조달 제출 패키지
+        <span class="card-sub">나라장터 규격 포맷</span>
+      </div>
+      <div class="card c-purple">문서 이력 관리</div>
+      <div class="card c-purple">PDF · HWP 다운로드</div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M4 10h12M12 6l4 4-4 4" stroke="#2672d9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- ⑤ 재고·풀필먼트 -->
+  <div class="col col-wide">
+    <div class="col-header ch-yellow">⑤ 공동 재고·풀필먼트</div>
+
+    <div class="group">
+      <div class="note-tag">INVENTORY</div>
+      <div class="card c-yellow entry">공동 재고 현황판
+        <span class="card-sub">회원사 통합 재고 뷰</span>
+      </div>
+      <div class="card c-yellow">내 재고 관리
+        <span class="card-sub">등록 · 수정 · 삭제</span>
+      </div>
+      <div class="card c-yellow">재고 입출고 이력</div>
+      <div class="card c-yellow">저재고 알림 설정</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">ORDER MGT</div>
+      <div class="card c-yellow">주문 접수 현황
+        <span class="card-sub">신규 · 처리중 · 완료</span>
+      </div>
+      <div class="card c-yellow">대형 프로젝트 주문
+        <span class="card-sub">공동 대응 배분</span>
+      </div>
+      <div class="card c-yellow">납기 스케줄 관리</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">FULFILLMENT</div>
+      <div class="card c-yellow">물류사 연동
+        <span class="card-sub">CJ대한통운 · 로젠</span>
+      </div>
+      <div class="card c-yellow">배송 추적
+        <span class="card-sub">실시간 트래킹</span>
+      </div>
+      <div class="card c-yellow">반품·AS 접수</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">WMS</div>
+      <div class="card c-yellow">창고 위치 관리</div>
+      <div class="card c-yellow">바코드·QR 스캔 입력</div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M4 10h12M12 6l4 4-4 4" stroke="#2672d9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- ⑥ 고객사 포털 -->
+  <div class="col">
+    <div class="col-header ch-cyan">⑥ 고객사 포털</div>
+
+    <div class="group">
+      <div class="note-tag">CUSTOMER</div>
+      <div class="card c-cyan entry">고객사 홈
+        <span class="card-sub">견적 · 주문 현황</span>
+      </div>
+      <div class="card c-cyan">견적 요청 내역</div>
+      <div class="card c-cyan">견적 비교·선택</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">B2G</div>
+      <div class="card c-cyan">조달 문서 수령함
+        <span class="card-sub">AI 생성 문서 확인</span>
+      </div>
+      <div class="card c-cyan">계약·발주 관리</div>
+      <div class="card c-cyan">세금계산서 관리</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">SUPPORT</div>
+      <div class="card c-cyan">배송 추적</div>
+      <div class="card c-cyan">AS · 문의 접수</div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M4 10h12M12 6l4 4-4 4" stroke="#2672d9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- ⑦ 관리자·정책 -->
+  <div class="col">
+    <div class="col-header ch-red">⑦ 관리자·정책 운영</div>
+
+    <div class="group">
+      <div class="note-tag">ADMIN</div>
+      <div class="card c-red entry">관리자 대시보드
+        <span class="card-sub">플랫폼 KPI 총괄</span>
+      </div>
+      <div class="card c-red">회원 관리
+        <span class="card-sub">상인 · 고객사 · 권한</span>
+      </div>
+      <div class="card c-red">상인 심사·승인</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">AI MODEL</div>
+      <div class="card c-red">AI 모델 관리
+        <span class="card-sub">소버린 AI 모델 버전</span>
+      </div>
+      <div class="card c-red">RAG 지식베이스 관리
+        <span class="card-sub">문서 업로드 · 갱신</span>
+      </div>
+      <div class="card c-red">AI 품질 모니터링
+        <span class="card-sub">견적 정확도 · 문서 품질</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">POLICY</div>
+      <div class="card c-red">서울시 정책 실증 리포트
+        <span class="card-sub">소버린 AI 성과 지표</span>
+      </div>
+      <div class="card c-red">공공조달 통계</div>
+      <div class="card c-red">시스템 설정·로그</div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M4 10h12M12 6l4 4-4 4" stroke="#2672d9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- ⑧ V2B·기관 연동 -->
+  <div class="col">
+    <div class="col-header ch-gray">⑧ V2B·기관 연동</div>
+
+    <div class="group">
+      <div class="note-tag">INTEGRATION</div>
+      <div class="card c-gray entry">나라장터 연동
+        <span class="card-sub">공공조달 자동 연계</span>
+      </div>
+      <div class="card c-gray">물류 API 허브
+        <span class="card-sub">CJ · 로젠 · 자체 물류</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">DATA</div>
+      <div class="card c-gray">GPU 가격 데이터 수집
+        <span class="card-sub">실시간 시세 트래킹</span>
+      </div>
+      <div class="card c-gray">공급사 연동
+        <span class="card-sub">제조사 · 총판 API</span>
+      </div>
+      <div class="card c-gray">조달청 규격 DB 연동</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">EXPORT</div>
+      <div class="card c-gray">데이터 분석 리포트</div>
+      <div class="card c-gray">서울시 소버린 AI 피드백
+        <span class="card-sub">모델 개선 데이터 제공</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑨ 공통 컴포넌트 -->
+  <div class="col" style="margin-left:26px;">
+    <div class="col-header ch-gray">공통 컴포넌트</div>
+
+    <div class="group">
+      <div class="note-tag">COMMON UI</div>
+      <div class="card c-gray">AI 챗봇 어시스턴트
+        <span class="card-sub">견적 · 조달 Q&A</span>
+      </div>
+      <div class="card c-gray">알림·푸시 시스템</div>
+      <div class="card c-gray">검색·필터 엔진</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">SETTINGS</div>
+      <div class="card c-gray">마이페이지</div>
+      <div class="card c-gray">권한·역할 설정</div>
+      <div class="card c-gray">언어·환경 설정</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">DOCS</div>
+      <div class="card c-gray">도움말·FAQ</div>
+      <div class="card c-gray">사용 매뉴얼</div>
+      <div class="card c-gray">공지사항</div>
+    </div>
+
+    <div class="group">
+      <div class="note-tag">LEGAL</div>
+      <div class="card c-gray">이용약관</div>
+      <div class="card c-gray">개인정보처리방침</div>
+    </div>
+  </div>
+
+</div><!-- /canvas -->
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <span class="bb-green">●</span>
+  <span>사용자 역할 : 상인(판매자) · 고객사(구매자) · 관리자(서울시/상우회)</span>
+  <span class="bb-sep">|</span>
+  <span class="bb-purple">◆</span>
+  <span>AI 핵심 : RAG 견적 엔진 + 소버린 AI 모델 (서울시 정책 연계)</span>
+  <span class="bb-sep">|</span>
+  <span class="bb-yellow">■</span>
+  <span>WMS : 상우회 회원사 공동 재고·납기 풀필먼트 통합</span>
+  <span class="bb-right">선인상우회 AI 플랫폼 흐름도 v1.1</span>
+</div>
+
+</body>
+</html>
